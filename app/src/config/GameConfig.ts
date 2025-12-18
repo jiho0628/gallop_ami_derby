@@ -6,7 +6,7 @@ export const GAME_HEIGHT = 1080;
 
 // コース設定（90秒以上のレース用）
 export const COURSE_CONFIG: CourseConfig = {
-  totalLength: 9000,      // コース全長（ピクセル）
+  totalLength: 13500,     // コース全長（ピクセル）
   branchDensity: 0.7,     // 分岐の密度（増量）
   gimmickDensity: 0.4,    // ギミックの密度（増量）
   laneCount: 15,          // レーン数
@@ -15,7 +15,7 @@ export const COURSE_CONFIG: CourseConfig = {
 
 // 馬の設定
 export const HORSE_CONFIG = {
-  baseSpeed: 80,          // 基本速度（ピクセル/秒）
+  baseSpeed: 120,         // 基本速度（ピクセル/秒）
   size: 48,               // 馬のサイズ
   startX: 100,            // スタート位置X
   laneChangeSpeed: 300,   // レーン移動速度（ピクセル/秒）
@@ -70,17 +70,17 @@ export const SCENES = {
 export const RACE_MODES = {
   SHORT: {
     name: '30秒',
-    totalLength: 3000,
+    totalLength: 4500,
     label: 'ショート',
   },
   MEDIUM: {
     name: '60秒',
-    totalLength: 6000,
+    totalLength: 9000,
     label: 'ミディアム',
   },
   LONG: {
     name: '90秒',
-    totalLength: 9000,
+    totalLength: 13500,
     label: 'ロング',
   },
 } as const;

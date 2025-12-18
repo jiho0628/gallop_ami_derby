@@ -27,12 +27,13 @@ export class Horse extends Phaser.GameObjects.Container {
   public grassEffectRemaining: number = 0; // グラス・イーター用
   public lastShuffleTime: number = 0;      // ミラクル・ダイス用
   public currentStatsMultiplier: number = 1; // ミラクル・ダイス用
+  public postLaneChangeInvincible: number = 0; // サイド・スライダー用（移動後無敵）
 
   // スタミナシステム
   public currentStamina: number = 1.0;    // 現在の体力（0.3～1.0）
   private staminaDrainRate: number;       // 体力減少率（秒あたり）
   private static readonly MIN_STAMINA = 0.3;       // 最低体力
-  private static readonly BASE_DRAIN_RATE = 0.01; // 基本減少率（秒あたり1%）
+  private static readonly BASE_DRAIN_RATE = 0.05; // 基本減少率（秒あたり5%）
 
   // ビジュアル要素
   private background: Phaser.GameObjects.Ellipse;
@@ -143,12 +144,17 @@ export class Horse extends Phaser.GameObjects.Container {
       this.grassEffectRemaining -= delta;
     }
 
+    // サイド・スライダー: 移動後無敵タイマー
+    if (this.postLaneChangeInvincible > 0) {
+      this.postLaneChangeInvincible -= delta;
+    }
+
     // ミラクル・ダイス: 5秒ごとにステータス変動
     if (this.horseData.id === 11) {
       const now = this.scene.time.now;
       if (now - this.lastShuffleTime > 5000) {
         this.lastShuffleTime = now;
-        this.currentStatsMultiplier = 0.7 + Math.random() * 0.8; // 0.7〜1.5の範囲に調整
+        this.currentStatsMultiplier = 1.0 + Math.random() * 1.0; // 1.0〜2.0の範囲
       }
     }
 
@@ -186,12 +192,7 @@ export class Horse extends Phaser.GameObjects.Container {
     const targetY = this.calculateLaneY(this.targetLane);
     const direction = targetY > currentY ? 1 : -1;
 
-    // サイド・スライダーは移動速度3倍
-    let laneChangeSpeed = HORSE_CONFIG.laneChangeSpeed;
-    if (this.horseData.id === 14) {
-      laneChangeSpeed *= 3;
-    }
-
+    const laneChangeSpeed = HORSE_CONFIG.laneChangeSpeed;
     const moveY = laneChangeSpeed * deltaSeconds * direction;
     this.y += moveY;
 
@@ -201,6 +202,14 @@ export class Horse extends Phaser.GameObjects.Container {
       this.currentLane = this.targetLane;
       this.isChangingLane = false;
       this.state = 'running';
+
+      // サイド・スライダー: 移動後1秒間、速度2.5倍＆無敵
+      if (this.horseData.id === 14) {
+        this.boostTimer = 1000;
+        this.boostMultiplier = 2.5;
+        this.postLaneChangeInvincible = 1000;
+        this.state = 'boosted';
+      }
     }
   }
 
@@ -230,9 +239,9 @@ export class Horse extends Phaser.GameObjects.Container {
     const gimmick = GIMMICKS[gimmickType];
     if (!gimmick) return { blocked: false };
 
-    // サイド・スライダー: レーン移動中は無敵
-    if (this.horseData.id === 14 && this.isChangingLane) {
-      return { blocked: true, message: `${this.horseData.name}は移動中で無敵！` };
+    // サイド・スライダー: 移動後1秒間は無敵
+    if (this.horseData.id === 14 && this.postLaneChangeInvincible > 0) {
+      return { blocked: true, message: `${this.horseData.name}は無敵状態！` };
     }
 
     // 固有能力による特殊処理
@@ -422,10 +431,10 @@ export class Horse extends Phaser.GameObjects.Container {
       return { blocked: false, message: `${this.horseData.name}が💧を粉砕！` };
     }
 
-    // マッドスライマー: 逆に加速
+    // マッドスライマー: 逆に加速（2.0倍）
     if (this.horseData.id === 6) {
       this.boostTimer = 2000;
-      this.boostMultiplier = 1.5;
+      this.boostMultiplier = 2.0;
       this.state = 'boosted';
       return { blocked: false, message: `${this.horseData.name}がぬかるみで加速！` };
     }
@@ -471,13 +480,6 @@ export class Horse extends Phaser.GameObjects.Container {
     // ゴースト・ライダー: 芝生の恩恵を受けない
     if (this.horseData.id === 9) {
       return { blocked: true, message: `${this.horseData.name}は芝生の恩恵を受けない...` };
-    }
-
-    // カオス・ジョーカー: 50%で効果反転
-    if (this.horseData.id === 5 && Math.random() < 0.5) {
-      this.boostTimer = 2000;
-      this.boostMultiplier = 0.5;
-      return { blocked: false, message: `${this.horseData.name}の効果反転！芝生で減速！` };
     }
 
     // 加速倍率計算

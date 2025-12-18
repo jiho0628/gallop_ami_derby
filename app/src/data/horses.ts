@@ -64,7 +64,7 @@ export const HORSES: HorseData[] = [
     stats: { speed: 1.0, intelligence: 0.8, power: 1.5, stamina: 1.4 },
     ability: {
       name: '泥遊び',
-      description: '💧（ぬかるみ）に入ると\nSpeedが1.5倍になる。',
+      description: '💧（ぬかるみ）に入ると\nSpeedが2.0倍になる。',
     },
     color: '#8B4513',
   },
@@ -116,10 +116,10 @@ export const HORSES: HorseData[] = [
     id: 11,
     name: 'ミラクル・ダイス',
     type: '不確定型',
-    stats: { speed: 1.0, intelligence: 1.0, power: 1.0, stamina: 1.0 },
+    stats: { speed: 0.8, intelligence: 0.8, power: 1.0, stamina: 0.8 },
     ability: {
       name: 'ステータス・シャッフル',
-      description: '5秒ごとに全ステータスが\n0.7〜1.5倍の間で変動。',
+      description: '5秒ごとに全ステータスが\n1.0〜2.0倍の間で変動。',
     },
     color: '#FF69B4',
   },
@@ -152,7 +152,7 @@ export const HORSES: HorseData[] = [
     stats: { speed: 1.0, intelligence: 1.5, power: 1.0, stamina: 1.0 },
     ability: {
       name: 'ラテラル・アクセル',
-      description: 'レーン移動の速度が3倍。\n移動中は無敵。',
+      description: 'レーン移動後1秒間\n速度2.5倍＆無敵。',
     },
     color: '#FF6347',
   },
