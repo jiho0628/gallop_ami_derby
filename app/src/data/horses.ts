@@ -6,7 +6,7 @@ export const HORSES: HorseData[] = [
     id: 1,
     name: 'ゴールデンバレット',
     type: 'スピード特化',
-    stats: { speed: 1.2, intelligence: 0.8, power: 0.5 },
+    stats: { speed: 1.5, intelligence: 0.8, power: 0.5, stamina: 0.5 },
     ability: {
       name: '芝生超加速',
       description: '芝生での加速率が2倍。\nただし💩とぬかるみに弱い。',
@@ -17,7 +17,7 @@ export const HORSES: HorseData[] = [
     id: 2,
     name: 'アイアンタフネス',
     type: 'パワー型',
-    stats: { speed: 1.0, intelligence: 0.6, power: 1.8 },
+    stats: { speed: 0.9, intelligence: 0.6, power: 1.8, stamina: 1.2 },
     ability: {
       name: '重装甲',
       description: '🚧💩💧を全て破壊して\n無効化する。',
@@ -28,7 +28,7 @@ export const HORSES: HorseData[] = [
     id: 3,
     name: 'プロフェッサーP',
     type: '知性派',
-    stats: { speed: 1.1, intelligence: 2.0, power: 0.8 },
+    stats: { speed: 1.1, intelligence: 2.0, power: 0.8, stamina: 1.0 },
     ability: {
       name: '最適解選択',
       description: '全ての悪いギミックを\n事前に検知して回避する。',
@@ -39,7 +39,7 @@ export const HORSES: HorseData[] = [
     id: 4,
     name: 'スプリングホッパー',
     type: '跳躍特化',
-    stats: { speed: 1.1, intelligence: 1.0, power: 1.0 },
+    stats: { speed: 1.1, intelligence: 1.0, power: 1.0, stamina: 1.0 },
     ability: {
       name: 'ハイジャンプ',
       description: '🌀で2レーン分跳び、\n着地後2秒間加速する。',
@@ -50,7 +50,7 @@ export const HORSES: HorseData[] = [
     id: 5,
     name: 'カオス・ジョーカー',
     type: 'ギャンブル',
-    stats: { speed: 1.0, intelligence: 1.0, power: 1.0 },
+    stats: { speed: 1.0, intelligence: 1.0, power: 1.0, stamina: 1.0 },
     ability: {
       name: '効果反転',
       description: '悪いギミック効果を50%で反転\n（💩💧🚧で加速）',
@@ -61,7 +61,7 @@ export const HORSES: HorseData[] = [
     id: 6,
     name: 'マッドスライマー',
     type: '泥専門',
-    stats: { speed: 0.9, intelligence: 0.8, power: 1.5 },
+    stats: { speed: 1.0, intelligence: 0.8, power: 1.5, stamina: 1.4 },
     ability: {
       name: '泥遊び',
       description: '💧（ぬかるみ）に入ると\nSpeedが1.5倍になる。',
@@ -72,7 +72,7 @@ export const HORSES: HorseData[] = [
     id: 7,
     name: 'グラス・イーター',
     type: '芝専門',
-    stats: { speed: 1.0, intelligence: 0.7, power: 1.2 },
+    stats: { speed: 1.0, intelligence: 0.7, power: 1.2, stamina: 1.2 },
     ability: {
       name: '常時ブースト',
       description: '🌱の効果時間が\nエリア外でも3倍持続。',
@@ -83,7 +83,7 @@ export const HORSES: HorseData[] = [
     id: 8,
     name: 'ミスター・セーフティ',
     type: '防御支援',
-    stats: { speed: 1.05, intelligence: 1.2, power: 1.3 },
+    stats: { speed: 1.05, intelligence: 1.2, power: 1.3, stamina: 1.3 },
     ability: {
       name: '安全圏',
       description: '💩💧を完全無効化。\n周囲の馬も💩から守る。',
@@ -94,7 +94,7 @@ export const HORSES: HorseData[] = [
     id: 9,
     name: 'ゴースト・ライダー',
     type: '透過型',
-    stats: { speed: 1.1, intelligence: 0.5, power: 1.0 },
+    stats: { speed: 1.1, intelligence: 0.5, power: 1.0, stamina: 1.0 },
     ability: {
       name: '透過',
       description: '🚧および他馬と衝突しない。\nただし芝生の恩恵も無効。',
@@ -105,7 +105,7 @@ export const HORSES: HorseData[] = [
     id: 10,
     name: 'ナイトメア・ハザード',
     type: '妨害魔',
-    stats: { speed: 1.2, intelligence: 1.1, power: 0.9 },
+    stats: { speed: 1.2, intelligence: 1.1, power: 0.9, stamina: 1.1 },
     ability: {
       name: 'トラップ配置',
       description: 'ギミック接触時、\n自分の真後ろに💩を設置。',
@@ -116,7 +116,7 @@ export const HORSES: HorseData[] = [
     id: 11,
     name: 'ミラクル・ダイス',
     type: '不確定型',
-    stats: { speed: 1.0, intelligence: 1.0, power: 1.0 },
+    stats: { speed: 1.0, intelligence: 1.0, power: 1.0, stamina: 1.0 },
     ability: {
       name: 'ステータス・シャッフル',
       description: '5秒ごとに全ステータスが\n0.7〜1.5倍の間で変動。',
@@ -127,7 +127,7 @@ export const HORSES: HorseData[] = [
     id: 12,
     name: 'ヘヴィ・メタル・ベア',
     type: '重量級',
-    stats: { speed: 0.95, intelligence: 0.5, power: 2.5 },
+    stats: { speed: 0.95, intelligence: 0.5, power: 2.5, stamina: 1.8 },
     ability: {
       name: 'ヘヴィ・ウェイト',
       description: '💧🚧を粉砕。\nただし🌀が反応しない。',
@@ -138,7 +138,7 @@ export const HORSES: HorseData[] = [
     id: 13,
     name: 'ドリーム・クリーナー',
     type: '掃除屋',
-    stats: { speed: 1.1, intelligence: 1.2, power: 0.8 },
+    stats: { speed: 1.1, intelligence: 1.2, power: 0.8, stamina: 1.1 },
     ability: {
       name: 'クリーン・ラン',
       description: '前方の💩を食べて無効化、\n1秒間Speed1.8倍。',
@@ -149,7 +149,7 @@ export const HORSES: HorseData[] = [
     id: 14,
     name: 'サイド・スライダー',
     type: '移動特化',
-    stats: { speed: 1.0, intelligence: 1.5, power: 1.0 },
+    stats: { speed: 1.0, intelligence: 1.5, power: 1.0, stamina: 1.0 },
     ability: {
       name: 'ラテラル・アクセル',
       description: 'レーン移動の速度が3倍。\n移動中は無敵。',
@@ -160,7 +160,7 @@ export const HORSES: HorseData[] = [
     id: 15,
     name: 'アンラッキー・バニー',
     type: '逆転型',
-    stats: { speed: 1.1, intelligence: 0.5, power: 0.5 },
+    stats: { speed: 1.1, intelligence: 0.5, power: 0.5, stamina: 0.8 },
     ability: {
       name: 'リベンジ・ダッシュ',
       description: '💩🚧💧を喰らうたびに\n3秒間Speed加算。',

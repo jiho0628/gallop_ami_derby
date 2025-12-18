@@ -323,6 +323,7 @@ export class PaddockScene extends Phaser.Scene {
       { label: 'SPD', value: horse.stats.speed, max: 1.5, color: 0xFF6B6B },
       { label: 'INT', value: horse.stats.intelligence, max: 2.0, color: 0x4ECDC4 },
       { label: 'POW', value: horse.stats.power, max: 2.5, color: 0xFFD93D },
+      { label: 'STA', value: horse.stats.stamina, max: 2.0, color: 0x9B59B6 },
     ];
 
     stats.forEach((stat, i) => {
@@ -358,7 +359,7 @@ export class PaddockScene extends Phaser.Scene {
     });
 
     // 能力セクション（ステータスの下に配置）
-    const abilityY = statsY + 180;
+    const abilityY = statsY + 205;
     const abilityBgHeight = 115;
     const abilityBg = this.add.rectangle(0, abilityY, cardWidth - 16, abilityBgHeight, 0x1a1a3a, 0.95);
     abilityBg.setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(horse.color).color, 0.6);

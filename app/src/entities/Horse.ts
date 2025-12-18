@@ -11,6 +11,7 @@ export class Horse extends Phaser.GameObjects.Container {
   public positionX: number = 0;
   public finishTime: number = 0;
   public condition: HorseCondition = 'normal';
+  public riderName: string = '';
   private conditionModifier: number = 1;
 
   // 状態管理
@@ -27,22 +28,32 @@ export class Horse extends Phaser.GameObjects.Container {
   public lastShuffleTime: number = 0;      // ミラクル・ダイス用
   public currentStatsMultiplier: number = 1; // ミラクル・ダイス用
 
+  // スタミナシステム
+  public currentStamina: number = 1.0;    // 現在の体力（0.3～1.0）
+  private staminaDrainRate: number;       // 体力減少率（秒あたり）
+  private static readonly MIN_STAMINA = 0.3;       // 最低体力
+  private static readonly BASE_DRAIN_RATE = 0.01; // 基本減少率（秒あたり1%）
+
   // ビジュアル要素
   private background: Phaser.GameObjects.Ellipse;
   private emoji: Phaser.GameObjects.Text;
   private label: Phaser.GameObjects.Text;
   private stateIndicator: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, horseData: HorseData, lane: number, condition: HorseCondition = 'normal') {
+  constructor(scene: Phaser.Scene, horseData: HorseData, lane: number, condition: HorseCondition = 'normal', rider: string = '') {
     super(scene, HORSE_CONFIG.startX, 0);
 
     this.horseData = horseData;
     this.currentLane = lane;
     this.targetLane = lane;
     this.condition = condition;
+    this.riderName = rider;
     this.conditionModifier = CONDITION_CONFIG[condition].speedModifier;
     this.currentSpeed = HORSE_CONFIG.baseSpeed * horseData.stats.speed * this.conditionModifier;
     this.positionX = HORSE_CONFIG.startX;
+
+    // スタミナ減少率を計算（体力が高いほど減りにくい）
+    this.staminaDrainRate = Horse.BASE_DRAIN_RATE / horseData.stats.stamina;
 
     // Y座標を計算
     this.updateYPosition();
@@ -59,9 +70,11 @@ export class Horse extends Phaser.GameObjects.Container {
     }).setOrigin(0.5);
     this.add(this.emoji);
 
-    // 番号ラベル
-    this.label = scene.add.text(0, HORSE_CONFIG.size * 0.5 + 5, `${horseData.id}`, {
-      fontSize: '16px',
+    // ラベル（乗馬者名があれば表示、なければ番号）
+    const labelText = rider || `${horseData.id}`;
+    const fontSize = rider ? '12px' : '16px';
+    this.label = scene.add.text(0, HORSE_CONFIG.size * 0.5 + 5, labelText, {
+      fontSize: fontSize,
       color: '#ffffff',
       fontStyle: 'bold',
       backgroundColor: '#000000',
@@ -95,6 +108,14 @@ export class Horse extends Phaser.GameObjects.Container {
     }
 
     const deltaSeconds = delta / 1000;
+
+    // スタミナ減少処理
+    if (this.currentStamina > Horse.MIN_STAMINA) {
+      this.currentStamina -= this.staminaDrainRate * deltaSeconds;
+      if (this.currentStamina < Horse.MIN_STAMINA) {
+        this.currentStamina = Horse.MIN_STAMINA;
+      }
+    }
 
     // スタンタイマー処理
     if (this.stunTimer > 0) {
@@ -139,6 +160,11 @@ export class Horse extends Phaser.GameObjects.Container {
 
     // 移動処理
     let speedMultiplier = this.boostMultiplier;
+
+    // スタミナによる速度低下（体力が減ると速度が落ちる）
+    // 100%→1.0, 30%→0.72の範囲で変動
+    const staminaSpeedModifier = 0.6 + 0.4 * this.currentStamina;
+    speedMultiplier *= staminaSpeedModifier;
 
     // ミラクル・ダイスの変動
     if (this.horseData.id === 11) {
@@ -203,6 +229,11 @@ export class Horse extends Phaser.GameObjects.Container {
   applyGimmickEffect(gimmickType: GimmickType): { blocked: boolean; message?: string } {
     const gimmick = GIMMICKS[gimmickType];
     if (!gimmick) return { blocked: false };
+
+    // サイド・スライダー: レーン移動中は無敵
+    if (this.horseData.id === 14 && this.isChangingLane) {
+      return { blocked: true, message: `${this.horseData.name}は移動中で無敵！` };
+    }
 
     // 固有能力による特殊処理
     const abilityResult = this.processAbility(gimmickType);
@@ -297,9 +328,14 @@ export class Horse extends Phaser.GameObjects.Container {
       this.changeLane(targetLane);
     });
 
-    // アンラッキー・バニー: リベンジスタック
+    // アンラッキー・バニー: リベンジスタック + 3秒加速
     if (this.horseData.id === 15) {
       this.revengeStack++;
+      this.scene.time.delayedCall(1000, () => {
+        this.boostTimer = 3000;
+        this.boostMultiplier = 1 + this.revengeStack * 0.2;
+        this.state = 'boosted';
+      });
     }
 
     return { blocked: false, message: `${this.horseData.name}が工事中に衝突！` };
@@ -414,9 +450,14 @@ export class Horse extends Phaser.GameObjects.Container {
     this.boostMultiplier = 0.5;
     this.stateIndicator.setText('💧');
 
-    // アンラッキー・バニー: リベンジスタック
+    // アンラッキー・バニー: リベンジスタック + 3秒加速
     if (this.horseData.id === 15) {
       this.revengeStack++;
+      this.scene.time.delayedCall(slowDuration, () => {
+        this.boostTimer = 3000;
+        this.boostMultiplier = 1 + this.revengeStack * 0.2;
+        this.state = 'boosted';
+      });
     }
 
     this.scene.time.delayedCall(slowDuration, () => {

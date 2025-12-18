@@ -486,7 +486,8 @@ export class RaceScene extends Phaser.Scene {
   private createHorses(): void {
     HORSES.forEach((horseData, index) => {
       const condition = this.horseConditions[index] || 'normal';
-      const horse = new Horse(this, horseData, index, condition);
+      const rider = this.horseRiders[index] || '';
+      const horse = new Horse(this, horseData, index, condition, rider);
       this.horses.push(horse);
       this.courseContainer.add(horse);
     });
