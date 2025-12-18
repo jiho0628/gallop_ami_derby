@@ -149,10 +149,10 @@ export class Horse extends Phaser.GameObjects.Container {
       this.postLaneChangeInvincible -= delta;
     }
 
-    // ミラクル・ダイス: 5秒ごとにステータス変動
+    // ミラクル・ダイス: 3秒ごとにステータス変動
     if (this.horseData.id === 11) {
       const now = this.scene.time.now;
-      if (now - this.lastShuffleTime > 5000) {
+      if (now - this.lastShuffleTime > 3000) {
         this.lastShuffleTime = now;
         this.currentStatsMultiplier = 1.0 + Math.random() * 1.0; // 1.0〜2.0の範囲
       }
@@ -210,6 +210,11 @@ export class Horse extends Phaser.GameObjects.Container {
         this.postLaneChangeInvincible = 1000;
         this.state = 'boosted';
       }
+
+      // スプリングホッパー: 移動でスタミナ5%回復
+      if (this.horseData.id === 4) {
+        this.currentStamina = Math.min(1.0, this.currentStamina + 0.05);
+      }
     }
   }
 
@@ -266,6 +271,9 @@ export class Horse extends Phaser.GameObjects.Container {
       case 'grass':
         return this.handleGrass();
 
+      case 'carrot':
+        return this.handleCarrot();
+
       default:
         return { blocked: false };
     }
@@ -277,13 +285,14 @@ export class Horse extends Phaser.GameObjects.Container {
       return { blocked: true, message: `${this.horseData.name}は重すぎてばねが反応しない！` };
     }
 
-    // スプリングホッパー: 2レーン跳ぶ + 加速
+    // スプリングホッパー: 2レーン跳ぶ + 加速 + スタミナ5%回復
     let laneShift = 1;
     if (this.horseData.id === 4) {
       laneShift = 2;
       this.boostTimer = 2000;
       this.boostMultiplier = 1.5;
       this.state = 'boosted';
+      this.currentStamina = Math.min(1.0, this.currentStamina + 0.05);
     }
 
     const direction = Math.random() < 0.5 ? -1 : 1;
@@ -300,8 +309,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleConstruction(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
-    if (this.horseData.id === 3 && Math.random() < 0.8) {
+    // プロフェッサーP: 悪いギミックを90%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.9) {
       return { blocked: true, message: `${this.horseData.name}が工事中を華麗に回避！` };
     }
 
@@ -315,16 +324,18 @@ export class Horse extends Phaser.GameObjects.Container {
       return { blocked: false, message: `${this.horseData.name}が工事中を破壊！` };
     }
 
-    // カオス・ジョーカー: 50%で効果反転（工事中を加速に）
-    if (this.horseData.id === 5 && Math.random() < 0.5) {
+    // カオス・ジョーカー: 40%で効果反転（工事中を加速に）
+    if (this.horseData.id === 5 && Math.random() < 0.4) {
       this.boostTimer = 2000;
       this.boostMultiplier = 1.5;
       this.state = 'boosted';
       return { blocked: false, message: `${this.horseData.name}の効果反転！🚧で加速！` };
     }
 
-    // 通常処理: 1秒停止後、隣のレーンへ
-    this.stunTimer = 1000;
+    // 通常処理: 1秒停止後、隣のレーンへ（POWでスタン時間短縮）
+    const baseStunTime = 1000;
+    const constructionStunTime = Math.floor(baseStunTime / this.horseData.stats.power);
+    this.stunTimer = constructionStunTime;
     this.state = 'stunned';
     this.stateIndicator.setText('💥');
 
@@ -333,16 +344,16 @@ export class Horse extends Phaser.GameObjects.Container {
       this.currentLane + direction));
 
     // 停止後にレーン移動
-    this.scene.time.delayedCall(1000, () => {
+    this.scene.time.delayedCall(constructionStunTime, () => {
       this.changeLane(targetLane);
     });
 
     // アンラッキー・バニー: リベンジスタック + 3秒加速
     if (this.horseData.id === 15) {
       this.revengeStack++;
-      this.scene.time.delayedCall(1000, () => {
+      this.scene.time.delayedCall(constructionStunTime, () => {
         this.boostTimer = 3000;
-        this.boostMultiplier = 1 + this.revengeStack * 0.2;
+        this.boostMultiplier = Math.min(2.0, 1 + this.revengeStack * 0.2);
         this.state = 'boosted';
       });
     }
@@ -351,8 +362,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handlePoop(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
-    if (this.horseData.id === 3 && Math.random() < 0.8) {
+    // プロフェッサーP: 悪いギミックを90%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.9) {
       return { blocked: true, message: `${this.horseData.name}が💩を華麗に回避！` };
     }
 
@@ -377,21 +388,24 @@ export class Horse extends Phaser.GameObjects.Container {
       return { blocked: false, message: `${this.horseData.name}が💩を粉砕！` };
     }
 
-    // カオス・ジョーカー: 50%で効果反転
-    if (this.horseData.id === 5 && Math.random() < 0.5) {
+    // カオス・ジョーカー: 40%で効果反転
+    if (this.horseData.id === 5 && Math.random() < 0.4) {
       this.boostTimer = 1500;
       this.boostMultiplier = 1.5;
       this.state = 'boosted';
       return { blocked: false, message: `${this.horseData.name}の効果反転！💩で加速！` };
     }
 
-    // スタン時間計算
+    // スタン時間計算（POWでスタン時間短縮）
     let stunDuration = 3000;
 
     // ゴールデンバレット: 2倍
     if (this.horseData.id === 1) {
       stunDuration *= 2;
     }
+
+    // POWでスタン時間短縮
+    stunDuration = Math.floor(stunDuration / this.horseData.stats.power);
 
     this.stunTimer = stunDuration;
     this.state = 'stunned';
@@ -402,7 +416,7 @@ export class Horse extends Phaser.GameObjects.Container {
       this.revengeStack++;
       this.scene.time.delayedCall(stunDuration, () => {
         this.boostTimer = 3000;
-        this.boostMultiplier = 1 + this.revengeStack * 0.2;
+        this.boostMultiplier = Math.min(2.0, 1 + this.revengeStack * 0.2);
         this.state = 'boosted';
       });
     }
@@ -411,8 +425,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleMud(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
-    if (this.horseData.id === 3 && Math.random() < 0.8) {
+    // プロフェッサーP: 悪いギミックを90%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.9) {
       return { blocked: true, message: `${this.horseData.name}がぬかるみを華麗に回避！` };
     }
 
@@ -439,8 +453,8 @@ export class Horse extends Phaser.GameObjects.Container {
       return { blocked: false, message: `${this.horseData.name}がぬかるみで加速！` };
     }
 
-    // カオス・ジョーカー: 50%で効果反転
-    if (this.horseData.id === 5 && Math.random() < 0.5) {
+    // カオス・ジョーカー: 40%で効果反転
+    if (this.horseData.id === 5 && Math.random() < 0.4) {
       this.boostTimer = 2000;
       this.boostMultiplier = 1.5;
       this.state = 'boosted';
@@ -464,7 +478,7 @@ export class Horse extends Phaser.GameObjects.Container {
       this.revengeStack++;
       this.scene.time.delayedCall(slowDuration, () => {
         this.boostTimer = 3000;
-        this.boostMultiplier = 1 + this.revengeStack * 0.2;
+        this.boostMultiplier = Math.min(2.0, 1 + this.revengeStack * 0.2);
         this.state = 'boosted';
       });
     }
@@ -508,6 +522,20 @@ export class Horse extends Phaser.GameObjects.Container {
     });
 
     return { blocked: false, message: `${this.horseData.name}が芝生で加速！` };
+  }
+
+  private handleCarrot(): { blocked: boolean; message?: string } {
+    // スタミナを20%回復（最大1.0まで）
+    const restoreAmount = 0.2;
+    this.currentStamina = Math.min(1.0, this.currentStamina + restoreAmount);
+
+    // 視覚的フィードバック
+    this.stateIndicator.setText('🥕');
+    this.scene.time.delayedCall(1000, () => {
+      this.stateIndicator.setText('');
+    });
+
+    return { blocked: false, message: `${this.horseData.name}が🥕を食べてスタミナ回復！` };
   }
 
   private processAbility(_gimmickType: GimmickType): { blocked: boolean; message?: string } {

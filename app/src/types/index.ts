@@ -45,7 +45,7 @@ export interface ConditionConfig {
 // ギミック関連の型定義
 // ========================================
 
-export type GimmickType = 'spring' | 'construction' | 'poop' | 'mud' | 'grass';
+export type GimmickType = 'spring' | 'construction' | 'poop' | 'mud' | 'grass' | 'carrot';
 
 export interface GimmickConfig {
   type: GimmickType;
@@ -56,6 +56,7 @@ export interface GimmickConfig {
     speedModifier?: number;  // 速度倍率
     laneShift?: number;      // レーン移動量
     stopTime?: number;       // 停止時間（ms）
+    staminaRestore?: number; // スタミナ回復量（0-1の割合）
   };
 }
 

@@ -6,7 +6,7 @@ export const HORSES: HorseData[] = [
     id: 1,
     name: 'ゴールデンバレット',
     type: 'スピード特化',
-    stats: { speed: 1.5, intelligence: 0.8, power: 0.5, stamina: 0.5 },
+    stats: { speed: 1.5, intelligence: 0.8, power: 0.9, stamina: 0.7 },
     ability: {
       name: '芝生超加速',
       description: '芝生での加速率が2倍。\nただし💩とぬかるみに弱い。',
@@ -31,7 +31,7 @@ export const HORSES: HorseData[] = [
     stats: { speed: 1.1, intelligence: 2.0, power: 0.8, stamina: 1.0 },
     ability: {
       name: '最適解選択',
-      description: '悪いギミックを80%の確率で\n事前に検知して回避する。',
+      description: '悪いギミックを90%の確率で\n事前に検知して回避する。',
     },
     color: '#4169E1',
   },
@@ -39,10 +39,10 @@ export const HORSES: HorseData[] = [
     id: 4,
     name: 'スプリングホッパー',
     type: '跳躍特化',
-    stats: { speed: 1.1, intelligence: 1.0, power: 1.0, stamina: 1.0 },
+    stats: { speed: 1.1, intelligence: 1.0, power: 1.4, stamina: 1.0 },
     ability: {
       name: 'ハイジャンプ',
-      description: '🌀で2レーン分跳び、\n着地後2秒間加速する。',
+      description: '🌀で2レーン分跳び着地後2秒間加速。\n移動でスタミナ5%回復。',
     },
     color: '#32CD32',
   },
@@ -50,10 +50,10 @@ export const HORSES: HorseData[] = [
     id: 5,
     name: 'カオス・ジョーカー',
     type: 'ギャンブル',
-    stats: { speed: 1.2, intelligence: 1.1, power: 1.1, stamina: 1.1 },
+    stats: { speed: 1.1, intelligence: 1.1, power: 0.8, stamina: 1.0 },
     ability: {
       name: '効果反転',
-      description: '悪いギミック効果を50%で反転\n（💩💧🚧で加速）',
+      description: '悪いギミック効果を40%で反転\n（💩💧🚧で加速）',
     },
     color: '#9400D3',
   },
@@ -61,7 +61,7 @@ export const HORSES: HorseData[] = [
     id: 6,
     name: 'マッドスライマー',
     type: '泥専門',
-    stats: { speed: 1.0, intelligence: 0.8, power: 1.5, stamina: 1.4 },
+    stats: { speed: 1.0, intelligence: 0.8, power: 1.4, stamina: 1.4 },
     ability: {
       name: '泥遊び',
       description: '💧（ぬかるみ）に入ると\nSpeedが2.0倍になる。',
@@ -105,7 +105,7 @@ export const HORSES: HorseData[] = [
     id: 10,
     name: 'ナイトメア・ハザード',
     type: '妨害魔',
-    stats: { speed: 1.2, intelligence: 1.1, power: 0.9, stamina: 1.1 },
+    stats: { speed: 1.2, intelligence: 1.1, power: 1.0, stamina: 1.1 },
     ability: {
       name: 'トラップ配置',
       description: 'ギミック接触時、\n自分の真後ろに💩を設置。',
@@ -116,10 +116,10 @@ export const HORSES: HorseData[] = [
     id: 11,
     name: 'ミラクル・ダイス',
     type: '不確定型',
-    stats: { speed: 0.8, intelligence: 0.8, power: 1.0, stamina: 0.8 },
+    stats: { speed: 0.8, intelligence: 0.8, power: 1.5, stamina: 1.0 },
     ability: {
       name: 'ステータス・シャッフル',
-      description: '5秒ごとに全ステータスが\n1.0〜2.0倍の間で変動。',
+      description: '3秒ごとに全ステータスが\n1.0〜2.0倍の間で変動。',
     },
     color: '#FF69B4',
   },
@@ -149,7 +149,7 @@ export const HORSES: HorseData[] = [
     id: 14,
     name: 'サイド・スライダー',
     type: '移動特化',
-    stats: { speed: 1.0, intelligence: 1.5, power: 1.0, stamina: 1.0 },
+    stats: { speed: 1.0, intelligence: 1.5, power: 1.0, stamina: 0.9 },
     ability: {
       name: 'ラテラル・アクセル',
       description: 'レーン移動後1秒間\n速度2.5倍＆無敵。',
@@ -160,7 +160,7 @@ export const HORSES: HorseData[] = [
     id: 15,
     name: 'アンラッキー・バニー',
     type: '逆転型',
-    stats: { speed: 1.1, intelligence: 0.5, power: 0.5, stamina: 0.8 },
+    stats: { speed: 1.1, intelligence: 0.5, power: 0.8, stamina: 0.8 },
     ability: {
       name: 'リベンジ・ダッシュ',
       description: '💩🚧💧を喰らうたびに\n3秒間Speed加算。',
@@ -212,6 +212,14 @@ export const GIMMICKS: Record<string, GimmickConfig> = {
     effect: {
       speedModifier: 1.5,
       duration: 2000,
+    },
+  },
+  carrot: {
+    type: 'carrot',
+    emoji: '🥕',
+    name: '人参',
+    effect: {
+      staminaRestore: 0.2,
     },
   },
 };

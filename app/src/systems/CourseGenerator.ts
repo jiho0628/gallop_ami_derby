@@ -119,8 +119,8 @@ export class CourseGenerator {
     specialDay: SpecialDayType
   ): PlacedGimmick[] {
     const gimmicks: PlacedGimmick[] = [];
-    const gimmickTypes: GimmickType[] = ['spring', 'construction', 'poop', 'mud', 'grass'];
-    const baseWeights = [0.18, 0.18, 0.22, 0.21, 0.21]; // 基本配置確率
+    const gimmickTypes: GimmickType[] = ['spring', 'construction', 'poop', 'mud', 'grass', 'carrot'];
+    const baseWeights = [0.17, 0.17, 0.21, 0.20, 0.20, 0.08]; // 基本配置確率（人参は少なめ）
 
     // 特別な日に応じて重みを調整
     const dayConfig = SPECIAL_DAY_CONFIG[specialDay];

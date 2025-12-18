@@ -150,6 +150,7 @@ export interface SpecialDayConfig {
     poop: number;
     mud: number;
     grass: number;
+    carrot: number;
   };
 }
 
@@ -165,6 +166,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 1,
       mud: 1,
       grass: 1,
+      carrot: 1,
     },
   },
   poop: {
@@ -178,6 +180,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 3.0,
       mud: 0.5,
       grass: 0.5,
+      carrot: 0.5,
     },
   },
   spring: {
@@ -191,6 +194,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 0.5,
       mud: 0.5,
       grass: 0.5,
+      carrot: 0.5,
     },
   },
   grass: {
@@ -204,6 +208,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 0.5,
       mud: 0.5,
       grass: 3.0,
+      carrot: 0.5,
     },
   },
   mud: {
@@ -217,6 +222,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 0.5,
       mud: 3.0,
       grass: 0.5,
+      carrot: 0.5,
     },
   },
   construction: {
@@ -230,6 +236,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 0.5,
       mud: 0.5,
       grass: 0.5,
+      carrot: 0.5,
     },
   },
   chaos: {
@@ -243,6 +250,7 @@ export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
       poop: 2.0,
       mud: 2.0,
       grass: 2.0,
+      carrot: 2.0,
     },
   },
 };
