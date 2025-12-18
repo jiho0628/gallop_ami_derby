@@ -6,6 +6,7 @@ export interface HorseStats {
   speed: number;        // SPD: 基本速度倍率 (0.7-1.5)
   intelligence: number; // INT: 分岐判断 (0.5-2.0)
   power: number;        // POW: 障害物耐性 (0.5-2.5)
+  stamina: number;      // STA: 体力・持久力 (0.5-2.0) 高いほど疲れにくい
 }
 
 export interface HorseAbility {

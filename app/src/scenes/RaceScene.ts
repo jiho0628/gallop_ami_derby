@@ -12,6 +12,8 @@ import {
   SCENES,
   RACE_MODES,
   RaceMode,
+  SpecialDayType,
+  SPECIAL_DAY_CONFIG,
 } from '../config/GameConfig';
 import type { CourseData, RaceResult, PlacedGimmick, HorseCondition } from '../types';
 
@@ -20,6 +22,7 @@ export class RaceScene extends Phaser.Scene {
   private courseData!: CourseData;
   private horseConditions: HorseCondition[] = [];
   private horseRiders: string[] = [];
+  private specialDay: SpecialDayType = 'normal';
   private raceManager!: RaceManager;
   private commentarySystem!: CommentarySystem;
   private laneResults: string[] = [];
@@ -64,11 +67,12 @@ export class RaceScene extends Phaser.Scene {
     }
   }
 
-  init(data: { laneResults: string[]; raceMode?: RaceMode; conditions?: HorseCondition[]; riders?: string[] }): void {
+  init(data: { laneResults: string[]; raceMode?: RaceMode; conditions?: HorseCondition[]; riders?: string[]; specialDay?: SpecialDayType }): void {
     this.laneResults = data.laneResults || [];
     this.raceMode = data.raceMode || 'LONG';
     this.horseConditions = data.conditions || [];
     this.horseRiders = data.riders || [];
+    this.specialDay = data.specialDay || 'normal';
     this.horses = [];
     this.raceStarted = false;
     this.raceFinished = false;
@@ -90,6 +94,7 @@ export class RaceScene extends Phaser.Scene {
       ...COURSE_CONFIG,
       totalLength: modeConfig.totalLength,
       laneResults: this.laneResults,
+      specialDay: this.specialDay,
     });
 
     // コースコンテナ
@@ -263,16 +268,19 @@ export class RaceScene extends Phaser.Scene {
     const totalHeight = COURSE_CONFIG.laneCount * COURSE_CONFIG.laneHeight;
     const startY = (GAME_HEIGHT - totalHeight) / 2;
 
+    // 特別な日に基づく背景色を取得
+    const bgColors = this.getBackgroundColorsForDay();
+
     // グラデーション風背景
     const bgGraphics = this.add.graphics();
-    bgGraphics.fillGradientStyle(0x0a1a0a, 0x0a1a0a, 0x1a2a1a, 0x1a2a1a, 1);
+    bgGraphics.fillGradientStyle(bgColors.bg1, bgColors.bg1, bgColors.bg2, bgColors.bg2, 1);
     bgGraphics.fillRect(-200, 0, this.courseData.totalLength + 700, GAME_HEIGHT);
     this.courseContainer.add(bgGraphics);
 
     // レーン描画
     for (let i = 0; i < COURSE_CONFIG.laneCount; i++) {
       const y = startY + i * COURSE_CONFIG.laneHeight;
-      const color = i % 2 === 0 ? 0x1a3a1a : 0x0f2a0f;
+      const color = i % 2 === 0 ? bgColors.lane1 : bgColors.lane2;
 
       const lane = this.add.rectangle(
         this.courseData.totalLength / 2,
@@ -285,7 +293,7 @@ export class RaceScene extends Phaser.Scene {
 
       // レーン境界線（グラデーション風）
       const lineGraphics = this.add.graphics();
-      lineGraphics.lineStyle(1, 0x4a6a4a, 0.5);
+      lineGraphics.lineStyle(1, bgColors.line, 0.5);
       lineGraphics.moveTo(-200, y);
       lineGraphics.lineTo(this.courseData.totalLength + 500, y);
       lineGraphics.strokePath();
@@ -695,5 +703,62 @@ export class RaceScene extends Phaser.Scene {
     const startY = (GAME_HEIGHT - totalHeight) / 2;
     this.drawGimmick(gimmick, startY);
     this.courseData.gimmicks.push(gimmick);
+  }
+
+  private getBackgroundColorsForDay(): { bg1: number; bg2: number; lane1: number; lane2: number; line: number } {
+    // 特別な日に基づく背景色
+    const colorSchemes: Record<SpecialDayType, { bg1: number; bg2: number; lane1: number; lane2: number; line: number }> = {
+      normal: {
+        bg1: 0x0a1a0a,
+        bg2: 0x1a2a1a,
+        lane1: 0x1a3a1a,
+        lane2: 0x0f2a0f,
+        line: 0x4a6a4a,
+      },
+      poop: {
+        bg1: 0x1a140a,
+        bg2: 0x2a1f0a,
+        lane1: 0x3a2a1a,
+        lane2: 0x2a1f0f,
+        line: 0x6a5a3a,
+      },
+      spring: {
+        bg1: 0x0a1a2a,
+        bg2: 0x1a2a3a,
+        lane1: 0x1a3a4a,
+        lane2: 0x0f2a3a,
+        line: 0x4a6a8a,
+      },
+      grass: {
+        bg1: 0x0a2a0a,
+        bg2: 0x1a3a1a,
+        lane1: 0x2a4a2a,
+        lane2: 0x1a3a1a,
+        line: 0x5a8a5a,
+      },
+      mud: {
+        bg1: 0x0a1020,
+        bg2: 0x1a2030,
+        lane1: 0x1a2a3a,
+        lane2: 0x0f1a2a,
+        line: 0x4a5a7a,
+      },
+      construction: {
+        bg1: 0x1a1a0a,
+        bg2: 0x2a2a1a,
+        lane1: 0x3a3a1a,
+        lane2: 0x2a2a0f,
+        line: 0x6a6a3a,
+      },
+      chaos: {
+        bg1: 0x1a0a1a,
+        bg2: 0x2a1a2a,
+        lane1: 0x3a1a3a,
+        lane2: 0x2a0f2a,
+        line: 0x6a4a6a,
+      },
+    };
+
+    return colorSchemes[this.specialDay] || colorSchemes.normal;
   }
 }

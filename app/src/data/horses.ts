@@ -160,7 +160,7 @@ export const HORSES: HorseData[] = [
     id: 15,
     name: 'アンラッキー・バニー',
     type: '逆転型',
-    stats: { speed: 1.2, intelligence: 0.5, power: 0.5 },
+    stats: { speed: 1.1, intelligence: 0.5, power: 0.5 },
     ability: {
       name: 'リベンジ・ダッシュ',
       description: '💩🚧💧を喰らうたびに\n3秒間Speed加算。',

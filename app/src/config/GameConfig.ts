@@ -129,3 +129,125 @@ export const CONDITION_WEIGHTS: { condition: HorseCondition; weight: number }[] 
   { condition: 'poor', weight: 20 },
   { condition: 'terrible', weight: 10 },
 ];
+
+// 特別な日の設定
+export type SpecialDayType = 'normal' | 'poop' | 'spring' | 'grass' | 'mud' | 'construction' | 'chaos';
+
+export interface SpecialDayConfig {
+  name: string;
+  emoji: string;
+  description: string;
+  color: string;
+  gimmickModifiers: {
+    spring: number;
+    construction: number;
+    poop: number;
+    mud: number;
+    grass: number;
+  };
+}
+
+export const SPECIAL_DAY_CONFIG: Record<SpecialDayType, SpecialDayConfig> = {
+  normal: {
+    name: '通常',
+    emoji: '🏇',
+    description: 'いつも通りのレース',
+    color: '#808080',
+    gimmickModifiers: {
+      spring: 1,
+      construction: 1,
+      poop: 1,
+      mud: 1,
+      grass: 1,
+    },
+  },
+  poop: {
+    name: 'うんこの日',
+    emoji: '💩',
+    description: 'うんこが大量発生！',
+    color: '#8B4513',
+    gimmickModifiers: {
+      spring: 0.5,
+      construction: 0.5,
+      poop: 3.0,
+      mud: 0.5,
+      grass: 0.5,
+    },
+  },
+  spring: {
+    name: 'ばねの日',
+    emoji: '🌀',
+    description: 'ばねだらけでピョンピョン！',
+    color: '#00BFFF',
+    gimmickModifiers: {
+      spring: 3.0,
+      construction: 0.5,
+      poop: 0.5,
+      mud: 0.5,
+      grass: 0.5,
+    },
+  },
+  grass: {
+    name: '芝生の日',
+    emoji: '🌱',
+    description: '芝生でみんな加速！',
+    color: '#32CD32',
+    gimmickModifiers: {
+      spring: 0.5,
+      construction: 0.5,
+      poop: 0.5,
+      mud: 0.5,
+      grass: 3.0,
+    },
+  },
+  mud: {
+    name: 'ぬかるみの日',
+    emoji: '💧',
+    description: '雨上がりでぬかるみ多発！',
+    color: '#4169E1',
+    gimmickModifiers: {
+      spring: 0.5,
+      construction: 0.5,
+      poop: 0.5,
+      mud: 3.0,
+      grass: 0.5,
+    },
+  },
+  construction: {
+    name: '工事の日',
+    emoji: '🚧',
+    description: '工事中だらけで迂回必須！',
+    color: '#FF8C00',
+    gimmickModifiers: {
+      spring: 0.5,
+      construction: 3.0,
+      poop: 0.5,
+      mud: 0.5,
+      grass: 0.5,
+    },
+  },
+  chaos: {
+    name: 'カオスの日',
+    emoji: '🎲',
+    description: '全ギミック大増量！',
+    color: '#FF1493',
+    gimmickModifiers: {
+      spring: 2.0,
+      construction: 2.0,
+      poop: 2.0,
+      mud: 2.0,
+      grass: 2.0,
+    },
+  },
+};
+
+// 特別な日の確率分布
+export const SPECIAL_DAY_WEIGHTS: { day: SpecialDayType; weight: number }[] = [
+  { day: 'normal', weight: 30 },
+  { day: 'poop', weight: 12 },
+  { day: 'spring', weight: 12 },
+  { day: 'grass', weight: 12 },
+  { day: 'mud', weight: 12 },
+  { day: 'construction', weight: 12 },
+  { day: 'chaos', weight: 10 },
+];

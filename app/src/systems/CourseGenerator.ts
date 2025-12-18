@@ -1,5 +1,5 @@
 import type { CourseData, AmidaBranch, PlacedGimmick, GimmickType, Lane } from '../types';
-import { COURSE_CONFIG, HORSE_CONFIG } from '../config/GameConfig';
+import { COURSE_CONFIG, HORSE_CONFIG, SPECIAL_DAY_CONFIG, SpecialDayType } from '../config/GameConfig';
 import { LANE_COLORS } from '../data/horses';
 
 interface GenerateConfig {
@@ -9,6 +9,7 @@ interface GenerateConfig {
   laneCount: number;
   laneHeight: number;
   laneResults?: string[];
+  specialDay?: SpecialDayType;
 }
 
 export class CourseGenerator {
@@ -19,6 +20,7 @@ export class CourseGenerator {
       gimmickDensity,
       laneCount,
       laneResults = [],
+      specialDay = 'normal',
     } = config;
 
     const startX = HORSE_CONFIG.startX;
@@ -37,8 +39,8 @@ export class CourseGenerator {
     // あみだ分岐生成
     const branches = this.generateBranches(startX, goalX, laneCount, branchDensity);
 
-    // ギミック生成
-    const gimmicks = this.generateGimmicks(startX, goalX, laneCount, gimmickDensity, branches);
+    // ギミック生成（特別な日に応じて確率を調整）
+    const gimmicks = this.generateGimmicks(startX, goalX, laneCount, gimmickDensity, branches, specialDay);
 
     return {
       lanes,
@@ -113,11 +115,20 @@ export class CourseGenerator {
     goalX: number,
     laneCount: number,
     density: number,
-    branches: AmidaBranch[]
+    branches: AmidaBranch[],
+    specialDay: SpecialDayType
   ): PlacedGimmick[] {
     const gimmicks: PlacedGimmick[] = [];
     const gimmickTypes: GimmickType[] = ['spring', 'construction', 'poop', 'mud', 'grass'];
-    const gimmickWeights = [0.18, 0.18, 0.22, 0.21, 0.21]; // 配置確率の重み
+    const baseWeights = [0.18, 0.18, 0.22, 0.21, 0.21]; // 基本配置確率
+
+    // 特別な日に応じて重みを調整
+    const dayConfig = SPECIAL_DAY_CONFIG[specialDay];
+    const gimmickWeights = baseWeights.map((weight, index) => {
+      const gimmickType = gimmickTypes[index];
+      const modifier = dayConfig.gimmickModifiers[gimmickType];
+      return weight * modifier;
+    });
 
     const minGap = 60;   // ギミック間の最小距離（縮小）
     const branchBuffer = 50; // 分岐からの最小距離（縮小）

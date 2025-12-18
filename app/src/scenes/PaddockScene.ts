@@ -9,6 +9,9 @@ import {
   RaceMode,
   CONDITION_CONFIG,
   CONDITION_WEIGHTS,
+  SPECIAL_DAY_CONFIG,
+  SPECIAL_DAY_WEIGHTS,
+  SpecialDayType,
 } from '../config/GameConfig';
 import type { HorseData, HorseCondition } from '../types';
 
@@ -25,6 +28,7 @@ export class PaddockScene extends Phaser.Scene {
   private riderPreset: string[] = [];
   private horseRiders: string[] = [];
   private riderSelects: HTMLSelectElement[] = [];
+  private specialDay: SpecialDayType = 'normal';
 
   constructor() {
     super({ key: SCENES.PADDOCK });
@@ -60,11 +64,17 @@ export class PaddockScene extends Phaser.Scene {
     // 調子を生成
     this.generateConditions();
 
+    // 特別な日を生成
+    this.generateSpecialDay();
+
     // 背景
     this.createBackground();
 
     // ヘッダー
     this.createHeader();
+
+    // 特別な日を右上に表示
+    this.createSpecialDayDisplay();
 
     // 馬カードギャラリー
     this.createHorseGallery();
@@ -785,6 +795,67 @@ export class PaddockScene extends Phaser.Scene {
     }
   }
 
+  private generateSpecialDay(): void {
+    const totalWeight = SPECIAL_DAY_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
+    const random = Math.random() * totalWeight;
+    let cumulative = 0;
+
+    for (const { day, weight } of SPECIAL_DAY_WEIGHTS) {
+      cumulative += weight;
+      if (random < cumulative) {
+        this.specialDay = day;
+        break;
+      }
+    }
+  }
+
+  private createSpecialDayDisplay(): void {
+    const dayConfig = SPECIAL_DAY_CONFIG[this.specialDay];
+    const x = GAME_WIDTH - 180;
+    const y = 45;
+
+    // 背景
+    const container = this.add.container(x, y);
+
+    const bg = this.add.rectangle(0, 0, 300, 70, 0x000000, 0.7);
+    bg.setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(dayConfig.color).color);
+    container.add(bg);
+
+    // タイトル
+    container.add(this.add.text(0, -18, '📅 今日は...', {
+      fontSize: '14px',
+      color: '#aaaaaa',
+    }).setOrigin(0.5));
+
+    // 日の名前
+    container.add(this.add.text(0, 8, `${dayConfig.emoji} ${dayConfig.name}`, {
+      fontSize: '26px',
+      color: dayConfig.color,
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 2,
+    }).setOrigin(0.5));
+
+    // 説明
+    container.add(this.add.text(0, 32, dayConfig.description, {
+      fontSize: '12px',
+      color: '#cccccc',
+    }).setOrigin(0.5));
+
+    // アニメーション
+    if (this.specialDay !== 'normal') {
+      this.tweens.add({
+        targets: container,
+        scaleX: 1.03,
+        scaleY: 1.03,
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
   private startRace(): void {
     // 景品設定: JSONから読み込んだものがあればそれを使う、なければデフォルト
     let laneResults: string[];
@@ -812,6 +883,7 @@ export class PaddockScene extends Phaser.Scene {
         raceMode: this.selectedMode,
         conditions: this.horseConditions,
         riders: this.horseRiders,
+        specialDay: this.specialDay,
       });
     });
   }
