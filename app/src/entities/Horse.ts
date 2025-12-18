@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { HorseData, HorseState, GimmickType, AbilityContext } from '../types';
+import type { HorseData, HorseState, GimmickType } from '../types';
 import { HORSE_CONFIG, COURSE_CONFIG } from '../config/GameConfig';
 import { GIMMICKS } from '../data/horses';
 
@@ -17,7 +17,7 @@ export class Horse extends Phaser.GameObjects.Container {
   private boostMultiplier: number = 1;
   private isChangingLane: boolean = false;
   private targetLane: number = 0;
-  private laneChangeProgress: number = 0;
+  private _laneChangeProgress: number = 0;
 
   // 固有能力用
   public revengeStack: number = 0;        // アンラッキー・バニー用
@@ -424,7 +424,7 @@ export class Horse extends Phaser.GameObjects.Container {
     return { blocked: false, message: `${this.horseData.name}が芝生で加速！` };
   }
 
-  private processAbility(gimmickType: GimmickType): { blocked: boolean; message?: string } {
+  private processAbility(_gimmickType: GimmickType): { blocked: boolean; message?: string } {
     // ナイトメア・ハザード: ギミック接触時に後方に💩を設置
     if (this.horseData.id === 10) {
       // RaceManagerで処理（💩設置）
@@ -435,7 +435,7 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   // プロフェッサーP用: 前方のギミックを検知
-  shouldAvoidBranch(branchX: number, gimmicksAhead: { type: GimmickType; lane: number }[]): boolean {
+  shouldAvoidBranch(_branchX: number, gimmicksAhead: { type: GimmickType; lane: number }[]): boolean {
     if (this.horseData.id !== 3) return false;
 
     const badGimmicks: GimmickType[] = ['poop', 'mud', 'construction'];

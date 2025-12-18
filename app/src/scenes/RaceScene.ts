@@ -9,7 +9,6 @@ import {
   GAME_HEIGHT,
   COURSE_CONFIG,
   RACE_CONFIG,
-  COLORS,
   SCENES,
   RACE_MODES,
   RaceMode,
@@ -573,7 +572,7 @@ export class RaceScene extends Phaser.Scene {
     });
   }
 
-  update(time: number, delta: number): void {
+  update(_time: number, delta: number): void {
     if (!this.raceStarted || this.raceFinished) return;
 
     this.raceTime += delta;

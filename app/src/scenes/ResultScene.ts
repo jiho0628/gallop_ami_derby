@@ -316,7 +316,7 @@ export class ResultScene extends Phaser.Scene {
     });
 
     // タイトルに戻るボタン
-    const titleButton = this.createButton(GAME_WIDTH / 2 + 150, buttonY, '🏠 タイトル', 0x2a4a8a, 0x4a6aaa, () => {
+    const _titleButton = this.createButton(GAME_WIDTH / 2 + 150, buttonY, '🏠 タイトル', 0x2a4a8a, 0x4a6aaa, () => {
       this.cameras.main.fadeOut(300);
       this.time.delayedCall(300, () => {
         this.scene.start(SCENES.TITLE);

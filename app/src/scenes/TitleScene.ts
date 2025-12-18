@@ -7,7 +7,7 @@ import {
 } from '../config/GameConfig';
 
 export class TitleScene extends Phaser.Scene {
-  private particleEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
+  private _particleEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
   private bgm!: Phaser.Sound.BaseSound;
 
   constructor() {
