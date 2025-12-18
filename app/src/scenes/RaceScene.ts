@@ -10,7 +10,7 @@ import {
   COURSE_CONFIG,
   RACE_CONFIG,
   SCENES,
-  RACE_MODES,
+  PIXELS_PER_METER,
   RaceMode,
   SpecialDayType,
   SPECIAL_DAY_CONFIG,
@@ -38,6 +38,7 @@ export class RaceScene extends Phaser.Scene {
   private raceTime: number = 0;
   private progressBar!: Phaser.GameObjects.Graphics;
   private rankingContainer!: Phaser.GameObjects.Container;
+  private staminaBars: Map<number, { bar: Phaser.GameObjects.Graphics; bg: Phaser.GameObjects.Graphics }> = new Map();
   private gimmickVisuals: Map<string, Phaser.GameObjects.GameObject[]> = new Map();
 
   private raceBgm!: Phaser.Sound.BaseSound;
@@ -67,12 +68,15 @@ export class RaceScene extends Phaser.Scene {
     }
   }
 
-  init(data: { laneResults: string[]; raceMode?: RaceMode; conditions?: HorseCondition[]; riders?: string[]; specialDay?: SpecialDayType }): void {
+  private courseLengthMeters: number = 2400;
+
+  init(data: { laneResults: string[]; raceMode?: RaceMode; conditions?: HorseCondition[]; riders?: string[]; specialDay?: SpecialDayType; courseLength?: number }): void {
     this.laneResults = data.laneResults || [];
     this.raceMode = data.raceMode || 'LONG';
     this.horseConditions = data.conditions || [];
     this.horseRiders = data.riders || [];
     this.specialDay = data.specialDay || 'normal';
+    this.courseLengthMeters = data.courseLength || 2400;
     this.horses = [];
     this.raceStarted = false;
     this.raceFinished = false;
@@ -80,19 +84,20 @@ export class RaceScene extends Phaser.Scene {
     this.cameraX = 0;
     this.raceTime = 0;
     this.gimmickVisuals = new Map();
+    this.staminaBars = new Map();
   }
 
   create(): void {
     // フェードイン
     this.cameras.main.fadeIn(300);
 
-    // モードに応じたコース長を取得
-    const modeConfig = RACE_MODES[this.raceMode];
+    // コース長をピクセルに変換
+    const totalLengthPixels = this.courseLengthMeters * PIXELS_PER_METER;
 
     // コース生成
     this.courseData = CourseGenerator.generate({
       ...COURSE_CONFIG,
-      totalLength: modeConfig.totalLength,
+      totalLength: totalLengthPixels,
       laneResults: this.laneResults,
       specialDay: this.specialDay,
     });
@@ -105,6 +110,9 @@ export class RaceScene extends Phaser.Scene {
 
     // 馬の生成
     this.createHorses();
+
+    // スタミナバーの生成
+    this.createStaminaBars();
 
     // システム初期化
     this.raceManager = new RaceManager(this, this.horses, this.courseData);
@@ -184,17 +192,29 @@ export class RaceScene extends Phaser.Scene {
     header.fillRect(0, 0, GAME_WIDTH, 50);
     header.setScrollFactor(0).setDepth(100);
 
-    // レースモード表示
+    // レースモード表示（左上）
     const modeNames: Record<RaceMode, string> = {
-      'SHORT': '短距離',
-      'MEDIUM': '中距離',
-      'LONG': '長距離',
+      'SHORT': 'スプリント',
+      'MEDIUM': 'マイル',
+      'LONG': 'ステイヤー',
     };
-    this.add.text(20, 25, `🏁 ${modeNames[this.raceMode]}レース`, {
+    this.add.text(20, 25, `🏁 ${modeNames[this.raceMode]}`, {
       fontSize: '20px',
       color: '#FFD700',
       fontStyle: 'bold',
     }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(101);
+
+    // コース長表示（右上）
+    const modeLabels: Record<RaceMode, string> = {
+      'SHORT': '短',
+      'MEDIUM': '中',
+      'LONG': '長',
+    };
+    this.add.text(GAME_WIDTH - 20, 25, `📏 ${this.courseLengthMeters}m（${modeLabels[this.raceMode]}）`, {
+      fontSize: '20px',
+      color: '#FFD700',
+      fontStyle: 'bold',
+    }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(101);
 
     // 進捗バー背景
     const progressBg = this.add.graphics();
@@ -231,6 +251,60 @@ export class RaceScene extends Phaser.Scene {
       color: '#FFD700',
       fontStyle: 'bold',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+  }
+
+  private createStaminaBars(): void {
+    const barWidth = 6;
+    const barHeight = 30;
+
+    this.horses.forEach((horse) => {
+      // バー背景
+      const barBg = this.add.graphics();
+      barBg.fillStyle(0x333333, 0.8);
+      barBg.fillRoundedRect(-barWidth / 2, -barHeight / 2, barWidth, barHeight, 2);
+      this.courseContainer.add(barBg);
+
+      // スタミナバー
+      const staminaBar = this.add.graphics();
+      this.courseContainer.add(staminaBar);
+
+      this.staminaBars.set(horse.horseData.id, { bar: staminaBar, bg: barBg });
+    });
+  }
+
+  private updateStaminaBars(): void {
+    const barWidth = 6;
+    const barHeight = 30;
+    const offsetX = -35; // 馬の後ろに配置
+
+    this.horses.forEach((horse) => {
+      const staminaData = this.staminaBars.get(horse.horseData.id);
+      if (!staminaData) return;
+
+      const { bar, bg } = staminaData;
+      const stamina = horse.currentStamina;
+      const fillHeight = barHeight * stamina;
+
+      // 位置を更新（馬の後ろ）
+      bg.setPosition(horse.positionX + offsetX, horse.y);
+      bar.setPosition(horse.positionX + offsetX, horse.y);
+
+      // 色を計算（100%=緑、50%=黄、30%=赤）
+      let color: number;
+      if (stamina > 0.6) {
+        color = 0x4CAF50; // 緑
+      } else if (stamina > 0.4) {
+        color = 0xFFEB3B; // 黄
+      } else {
+        color = 0xF44336; // 赤
+      }
+
+      bar.clear();
+      bar.fillStyle(color, 1);
+      // 下から上に向かって描画
+      const emptyHeight = barHeight - fillHeight;
+      bar.fillRoundedRect(-barWidth / 2, -barHeight / 2 + emptyHeight, barWidth, fillHeight, 2);
+    });
   }
 
   private showFinishOverlay(): void {
@@ -608,6 +682,9 @@ export class RaceScene extends Phaser.Scene {
 
     // ランキング表示更新
     this.updateRanking();
+
+    // スタミナゲージ更新
+    this.updateStaminaBars();
   }
 
   private updateProgressBar(): void {

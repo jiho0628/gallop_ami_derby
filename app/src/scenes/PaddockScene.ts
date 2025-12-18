@@ -17,7 +17,8 @@ import type { HorseData, HorseCondition } from '../types';
 
 export class PaddockScene extends Phaser.Scene {
   private selectedMode: RaceMode = 'LONG';
-  private modeButtons: Map<RaceMode, { bg: Phaser.GameObjects.Rectangle; inner: Phaser.GameObjects.Rectangle }> = new Map();
+  private courseLength: number = 3200;
+  private courseLengthText!: Phaser.GameObjects.Text;
   private currentPage: number = 0;
   private totalPages: number = 3;
   private cardContainer!: Phaser.GameObjects.Container;
@@ -36,6 +37,11 @@ export class PaddockScene extends Phaser.Scene {
 
   init(data: { riderPreset?: string[] }): void {
     this.riderPreset = data.riderPreset || [];
+    // シーン再開時にリセット
+    this.specialDay = 'normal';
+    this.selectedMode = 'LONG';
+    this.courseLength = 3200;
+    this.horseConditions = [];
   }
 
   preload(): void {
@@ -67,6 +73,9 @@ export class PaddockScene extends Phaser.Scene {
     // 特別な日を生成
     this.generateSpecialDay();
 
+    // コース長を生成
+    this.generateCourseLength();
+
     // 背景
     this.createBackground();
 
@@ -76,6 +85,9 @@ export class PaddockScene extends Phaser.Scene {
     // 特別な日を右上に表示
     this.createSpecialDayDisplay();
 
+    // コース長を右上に表示
+    this.createCourseLengthDisplay();
+
     // 馬カードギャラリー
     this.createHorseGallery();
 
@@ -84,9 +96,6 @@ export class PaddockScene extends Phaser.Scene {
 
     // JSON読み込みセクション
     this.createJsonLoadSection();
-
-    // モード選択
-    this.createModeSelection();
 
     // スタートボタン
     this.createStartButton();
@@ -619,89 +628,6 @@ export class PaddockScene extends Phaser.Scene {
     }));
   }
 
-  private createModeSelection(): void {
-    const startY = 780;
-
-    // セクション背景
-    const sectionBg = this.add.graphics();
-    sectionBg.fillStyle(0x000000, 0.4);
-    sectionBg.fillRoundedRect(GAME_WIDTH / 2 - 400, startY - 10, 800, 100, 15);
-
-    this.add.text(GAME_WIDTH / 2, startY + 10, '⏱ レース時間を選択', {
-      fontSize: '24px',
-      color: '#4ECDC4',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    const modes: RaceMode[] = ['SHORT', 'MEDIUM', 'LONG'];
-    const buttonWidth = 200;
-    const gap = 30;
-    const totalWidth = modes.length * buttonWidth + (modes.length - 1) * gap;
-    const startX = GAME_WIDTH / 2 - totalWidth / 2 + buttonWidth / 2;
-
-    modes.forEach((mode, index) => {
-      const x = startX + index * (buttonWidth + gap);
-      const modeConfig = RACE_MODES[mode];
-      const isSelected = mode === this.selectedMode;
-
-      const container = this.add.container(x, startY + 55);
-
-      // 影
-      const shadow = this.add.rectangle(4, 4, buttonWidth, 55, 0x000000, 0.4);
-      container.add(shadow);
-
-      // ボタン背景
-      const bg = this.add.rectangle(0, 0, buttonWidth, 55,
-        isSelected ? 0x2a5a8a : 0x2a2a3a);
-      bg.setStrokeStyle(3, isSelected ? 0x4a9aca : 0x3a3a4a);
-      container.add(bg);
-
-      // 内側のハイライト
-      const inner = this.add.rectangle(0, -5, buttonWidth - 10, 40,
-        isSelected ? 0x3a7aba : 0x3a3a4a);
-      container.add(inner);
-
-      // テキスト
-      container.add(this.add.text(0, -8, modeConfig.name, {
-        fontSize: '26px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-      }).setOrigin(0.5));
-
-      container.add(this.add.text(0, 18, modeConfig.label, {
-        fontSize: '14px',
-        color: isSelected ? '#aaccee' : '#888888',
-      }).setOrigin(0.5));
-
-      this.modeButtons.set(mode, { bg, inner });
-
-      bg.setInteractive({ useHandCursor: true });
-      bg.on('pointerdown', () => this.selectMode(mode));
-      bg.on('pointerover', () => {
-        if (mode !== this.selectedMode) {
-          bg.setFillStyle(0x3a3a4a);
-        }
-      });
-      bg.on('pointerout', () => {
-        if (mode !== this.selectedMode) {
-          bg.setFillStyle(0x2a2a3a);
-        }
-      });
-    });
-  }
-
-  private selectMode(mode: RaceMode): void {
-    try { this.sound.play('button-click', { volume: 0.7 }); } catch (e) { /* ignore */ }
-    this.selectedMode = mode;
-
-    this.modeButtons.forEach((buttons, m) => {
-      const isSelected = m === mode;
-      buttons.bg.setFillStyle(isSelected ? 0x2a5a8a : 0x2a2a3a);
-      buttons.bg.setStrokeStyle(3, isSelected ? 0x4a9aca : 0x3a3a4a);
-      buttons.inner.setFillStyle(isSelected ? 0x3a7aba : 0x3a3a4a);
-    });
-  }
-
   private createStartButton(): void {
     const button = this.add.container(GAME_WIDTH / 2, 920);
 
@@ -810,6 +736,51 @@ export class PaddockScene extends Phaser.Scene {
     }
   }
 
+  private generateCourseLength(): void {
+    // ランダムにモードを選択
+    const modes: RaceMode[] = ['SHORT', 'MEDIUM', 'LONG'];
+    this.selectedMode = modes[Math.floor(Math.random() * modes.length)];
+
+    const modeConfig = RACE_MODES[this.selectedMode];
+    this.courseLength = Math.floor(
+      modeConfig.minLength + Math.random() * (modeConfig.maxLength - modeConfig.minLength)
+    );
+    this.courseLength = Math.round(this.courseLength / 100) * 100;
+  }
+
+  private createCourseLengthDisplay(): void {
+    const x = GAME_WIDTH - 490;
+    const y = 45;
+
+    // モードラベル
+    const modeLabels: Record<RaceMode, string> = {
+      'SHORT': '短',
+      'MEDIUM': '中',
+      'LONG': '長',
+    };
+
+    // 背景
+    const container = this.add.container(x, y);
+
+    const bg = this.add.rectangle(0, 0, 160, 50, 0x000000, 0.7);
+    bg.setStrokeStyle(2, 0xFFD700);
+    container.add(bg);
+
+    // ラベル
+    container.add(this.add.text(0, -12, '📏 コース長', {
+      fontSize: '12px',
+      color: '#aaaaaa',
+    }).setOrigin(0.5));
+
+    // コース長（モードラベル付き）
+    this.courseLengthText = this.add.text(0, 10, `${this.courseLength}m（${modeLabels[this.selectedMode]}）`, {
+      fontSize: '20px',
+      color: '#FFD700',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    container.add(this.courseLengthText);
+  }
+
   private createSpecialDayDisplay(): void {
     const dayConfig = SPECIAL_DAY_CONFIG[this.specialDay];
     const x = GAME_WIDTH - 180;
@@ -885,6 +856,7 @@ export class PaddockScene extends Phaser.Scene {
         conditions: this.horseConditions,
         riders: this.horseRiders,
         specialDay: this.specialDay,
+        courseLength: this.courseLength,
       });
     });
   }

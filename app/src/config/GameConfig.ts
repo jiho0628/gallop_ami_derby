@@ -66,22 +66,28 @@ export const SCENES = {
   RESULT: 'ResultScene',
 } as const;
 
-// レースモード設定
+// レースモード設定（距離はメートル表示、内部はピクセル）
+// 1メートル = 3ピクセル として変換
+export const PIXELS_PER_METER = 3;
+
 export const RACE_MODES = {
   SHORT: {
-    name: '30秒',
-    totalLength: 4500,
-    label: 'ショート',
+    name: '1200〜1600m',
+    minLength: 1200,
+    maxLength: 1600,
+    label: 'スプリント',
   },
   MEDIUM: {
-    name: '60秒',
-    totalLength: 9000,
-    label: 'ミディアム',
+    name: '1800〜2400m',
+    minLength: 1800,
+    maxLength: 2400,
+    label: 'マイル',
   },
   LONG: {
-    name: '90秒',
-    totalLength: 13500,
-    label: 'ロング',
+    name: '2800〜3600m',
+    minLength: 2800,
+    maxLength: 3600,
+    label: 'ステイヤー',
   },
 } as const;
 

@@ -31,7 +31,7 @@ export const HORSES: HorseData[] = [
     stats: { speed: 1.1, intelligence: 2.0, power: 0.8, stamina: 1.0 },
     ability: {
       name: '最適解選択',
-      description: '全ての悪いギミックを\n事前に検知して回避する。',
+      description: '悪いギミックを80%の確率で\n事前に検知して回避する。',
     },
     color: '#4169E1',
   },
@@ -50,7 +50,7 @@ export const HORSES: HorseData[] = [
     id: 5,
     name: 'カオス・ジョーカー',
     type: 'ギャンブル',
-    stats: { speed: 1.0, intelligence: 1.0, power: 1.0, stamina: 1.0 },
+    stats: { speed: 1.2, intelligence: 1.1, power: 1.1, stamina: 1.1 },
     ability: {
       name: '効果反転',
       description: '悪いギミック効果を50%で反転\n（💩💧🚧で加速）',

@@ -33,7 +33,7 @@ export class Horse extends Phaser.GameObjects.Container {
   public currentStamina: number = 1.0;    // 現在の体力（0.3～1.0）
   private staminaDrainRate: number;       // 体力減少率（秒あたり）
   private static readonly MIN_STAMINA = 0.3;       // 最低体力
-  private static readonly BASE_DRAIN_RATE = 0.05; // 基本減少率（秒あたり5%）
+  private static readonly BASE_DRAIN_RATE = 0.01; // 基本減少率（秒あたり1%）
 
   // ビジュアル要素
   private background: Phaser.GameObjects.Ellipse;
@@ -168,8 +168,8 @@ export class Horse extends Phaser.GameObjects.Container {
     let speedMultiplier = this.boostMultiplier;
 
     // スタミナによる速度低下（体力が減ると速度が落ちる）
-    // 100%→1.0, 30%→0.72の範囲で変動
-    const staminaSpeedModifier = 0.6 + 0.4 * this.currentStamina;
+    // 100%→1.0, 30%→0.51の範囲で変動（より大きな影響）
+    const staminaSpeedModifier = 0.3 + 0.7 * this.currentStamina;
     speedMultiplier *= staminaSpeedModifier;
 
     // ミラクル・ダイスの変動
@@ -300,8 +300,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleConstruction(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを事前回避
-    if (this.horseData.id === 3) {
+    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.8) {
       return { blocked: true, message: `${this.horseData.name}が工事中を華麗に回避！` };
     }
 
@@ -351,8 +351,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handlePoop(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを事前回避
-    if (this.horseData.id === 3) {
+    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.8) {
       return { blocked: true, message: `${this.horseData.name}が💩を華麗に回避！` };
     }
 
@@ -411,8 +411,8 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleMud(): { blocked: boolean; message?: string } {
-    // プロフェッサーP: 悪いギミックを事前回避
-    if (this.horseData.id === 3) {
+    // プロフェッサーP: 悪いギミックを80%の確率で事前回避
+    if (this.horseData.id === 3 && Math.random() < 0.8) {
       return { blocked: true, message: `${this.horseData.name}がぬかるみを華麗に回避！` };
     }
 
