@@ -1,4 +1,4 @@
-import type { CourseConfig } from '../types';
+import type { CourseConfig, HorseCondition, ConditionConfig } from '../types';
 
 // ゲーム画面設定
 export const GAME_WIDTH = 1920;
@@ -86,3 +86,46 @@ export const RACE_MODES = {
 } as const;
 
 export type RaceMode = keyof typeof RACE_MODES;
+
+// 調子設定
+export const CONDITION_CONFIG: Record<HorseCondition, ConditionConfig> = {
+  excellent: {
+    name: '絶好調',
+    emoji: '🔥',
+    speedModifier: 1.15,
+    color: '#FF4500',
+  },
+  good: {
+    name: '好調',
+    emoji: '😊',
+    speedModifier: 1.07,
+    color: '#32CD32',
+  },
+  normal: {
+    name: '普通',
+    emoji: '😐',
+    speedModifier: 1.0,
+    color: '#808080',
+  },
+  poor: {
+    name: '不調',
+    emoji: '😓',
+    speedModifier: 0.93,
+    color: '#4169E1',
+  },
+  terrible: {
+    name: '絶不調',
+    emoji: '😵',
+    speedModifier: 0.85,
+    color: '#8B008B',
+  },
+};
+
+// 調子の確率分布
+export const CONDITION_WEIGHTS: { condition: HorseCondition; weight: number }[] = [
+  { condition: 'excellent', weight: 10 },
+  { condition: 'good', weight: 25 },
+  { condition: 'normal', weight: 35 },
+  { condition: 'poor', weight: 20 },
+  { condition: 'terrible', weight: 10 },
+];

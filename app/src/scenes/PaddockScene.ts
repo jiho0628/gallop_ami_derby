@@ -7,8 +7,10 @@ import {
   SCENES,
   RACE_MODES,
   RaceMode,
+  CONDITION_CONFIG,
+  CONDITION_WEIGHTS,
 } from '../config/GameConfig';
-import type { HorseData } from '../types';
+import type { HorseData, HorseCondition } from '../types';
 
 export class PaddockScene extends Phaser.Scene {
   private selectedMode: RaceMode = 'LONG';
@@ -19,9 +21,17 @@ export class PaddockScene extends Phaser.Scene {
   private loadedPrizes: string[] = [];
   private prizesContainer!: Phaser.GameObjects.Container;
   private fileInput!: HTMLInputElement;
+  private horseConditions: HorseCondition[] = [];
+  private riderPreset: string[] = [];
+  private horseRiders: string[] = [];
+  private riderSelects: HTMLSelectElement[] = [];
 
   constructor() {
     super({ key: SCENES.PADDOCK });
+  }
+
+  init(data: { riderPreset?: string[] }): void {
+    this.riderPreset = data.riderPreset || [];
   }
 
   preload(): void {
@@ -43,6 +53,12 @@ export class PaddockScene extends Phaser.Scene {
     this.cameras.main.fadeIn(300);
     this.currentPage = 0;
     this.loadedPrizes = [];
+    // riderPresetはinit()で設定済み
+    this.horseRiders = new Array(HORSES.length).fill('');
+    this.riderSelects = [];
+
+    // 調子を生成
+    this.generateConditions();
 
     // 背景
     this.createBackground();
@@ -65,12 +81,18 @@ export class PaddockScene extends Phaser.Scene {
     // スタートボタン
     this.createStartButton();
 
-    // シーン終了時にファイル入力を削除
+    // シーン終了時にHTML要素を削除
     this.events.on('shutdown', () => {
       if (this.fileInput) {
         this.fileInput.remove();
       }
+      this.cleanupRiderSelects();
     });
+  }
+
+  private cleanupRiderSelects(): void {
+    this.riderSelects.forEach(select => select.remove());
+    this.riderSelects = [];
   }
 
   private createBackground(): void {
@@ -135,6 +157,9 @@ export class PaddockScene extends Phaser.Scene {
     this.currentPage = page;
     this.cardContainer.removeAll(true);
 
+    // 既存の乗馬者選択セレクトを削除
+    this.cleanupRiderSelects();
+
     const horsesPerPage = 5;
     const startIndex = page * horsesPerPage;
     const endIndex = Math.min(startIndex + horsesPerPage, HORSES.length);
@@ -145,18 +170,74 @@ export class PaddockScene extends Phaser.Scene {
     const totalWidth = 5 * cardWidth + 4 * gap;
     const startX = (GAME_WIDTH - totalWidth) / 2 + cardWidth / 2;
 
+    // HTML要素の位置計算用
+    const canvas = this.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+    const scaleX = canvasRect.width / GAME_WIDTH;
+    const scaleY = canvasRect.height / GAME_HEIGHT;
+
     for (let i = startIndex; i < endIndex; i++) {
       const col = i - startIndex;
       const x = startX + col * (cardWidth + gap);
       const y = 340;
 
-      const card = this.createHorseCard(HORSES[i], x, y, cardWidth, cardHeight);
+      const card = this.createHorseCard(HORSES[i], x, y, cardWidth, cardHeight, i);
       this.cardContainer.add(card);
+
+      // 乗馬者選択用セレクトボックスを作成
+      this.createRiderSelect(i, x, y + cardHeight / 2 - 15, scaleX, scaleY, canvasRect);
     }
   }
 
-  private createHorseCard(horse: HorseData, x: number, y: number, cardWidth: number, cardHeight: number): Phaser.GameObjects.Container {
+  private createRiderSelect(horseIndex: number, x: number, y: number, scaleX: number, scaleY: number, canvasRect: DOMRect): void {
+    const select = document.createElement('select');
+    select.style.position = 'absolute';
+    select.style.left = `${canvasRect.left + (x - 70) * scaleX}px`;
+    select.style.top = `${canvasRect.top + y * scaleY}px`;
+    select.style.width = `${140 * scaleX}px`;
+    select.style.height = `${24 * scaleY}px`;
+    select.style.fontSize = `${12 * scaleY}px`;
+    select.style.padding = '2px';
+    select.style.borderRadius = '4px';
+    select.style.border = '1px solid #4a4a6a';
+    select.style.backgroundColor = '#2a2a4a';
+    select.style.color = '#ffffff';
+    select.style.zIndex = '100';
+
+    // 空のオプション
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.text = '-- 選択 --';
+    select.appendChild(emptyOption);
+
+    // プリセットからオプションを追加
+    this.riderPreset.forEach(rider => {
+      const option = document.createElement('option');
+      option.value = rider;
+      option.text = rider;
+      if (this.horseRiders[horseIndex] === rider) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+
+    // 選択済みの値を復元
+    if (this.horseRiders[horseIndex]) {
+      select.value = this.horseRiders[horseIndex];
+    }
+
+    select.addEventListener('change', () => {
+      this.horseRiders[horseIndex] = select.value;
+    });
+
+    document.body.appendChild(select);
+    this.riderSelects.push(select);
+  }
+
+  private createHorseCard(horse: HorseData, x: number, y: number, cardWidth: number, cardHeight: number, horseIndex: number): Phaser.GameObjects.Container {
     const container = this.add.container(x, y);
+    const condition = this.horseConditions[horseIndex] || 'normal';
+    const conditionConfig = CONDITION_CONFIG[condition];
 
     // カード影
     const shadow = this.add.rectangle(5, 5, cardWidth, cardHeight, 0x000000, 0.6);
@@ -188,6 +269,19 @@ export class PaddockScene extends Phaser.Scene {
     // 馬アイコン
     container.add(this.add.text(cardWidth / 2 - 40, -cardHeight / 2 + 35, '🐴', {
       fontSize: '38px',
+    }).setOrigin(0.5));
+
+    // 調子表示（番号バッジの右）
+    const conditionBg = this.add.rectangle(-cardWidth / 2 + 110, -cardHeight / 2 + 35, 70, 24,
+      Phaser.Display.Color.HexStringToColor(conditionConfig.color).color, 0.9);
+    conditionBg.setStrokeStyle(1, 0xffffff);
+    container.add(conditionBg);
+    container.add(this.add.text(-cardWidth / 2 + 110, -cardHeight / 2 + 35, `${conditionConfig.emoji}${conditionConfig.name}`, {
+      fontSize: '13px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 1,
     }).setOrigin(0.5));
 
     // 馬名（より大きく、読みやすく）
@@ -284,6 +378,14 @@ export class PaddockScene extends Phaser.Scene {
       align: 'center',
       lineSpacing: 3,
     }).setOrigin(0.5, 0));
+
+    // 乗馬者選択セクション
+    const riderY = cardHeight / 2 - 35;
+    container.add(this.add.text(0, riderY, '👤 乗馬者', {
+      fontSize: '12px',
+      color: '#4ECDC4',
+      fontStyle: 'bold',
+    }).setOrigin(0.5));
 
     return container;
   }
@@ -662,6 +764,27 @@ export class PaddockScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
 
+  private generateConditions(): void {
+    this.horseConditions = [];
+    const totalWeight = CONDITION_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
+
+    for (let i = 0; i < HORSES.length; i++) {
+      const random = Math.random() * totalWeight;
+      let cumulative = 0;
+      let selectedCondition: HorseCondition = 'normal';
+
+      for (const { condition, weight } of CONDITION_WEIGHTS) {
+        cumulative += weight;
+        if (random < cumulative) {
+          selectedCondition = condition;
+          break;
+        }
+      }
+
+      this.horseConditions.push(selectedCondition);
+    }
+  }
+
   private startRace(): void {
     // 景品設定: JSONから読み込んだものがあればそれを使う、なければデフォルト
     let laneResults: string[];
@@ -687,6 +810,8 @@ export class PaddockScene extends Phaser.Scene {
       this.scene.start(SCENES.RACE, {
         laneResults: laneResults,
         raceMode: this.selectedMode,
+        conditions: this.horseConditions,
+        riders: this.horseRiders,
       });
     });
   }

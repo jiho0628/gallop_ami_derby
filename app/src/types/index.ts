@@ -30,6 +30,16 @@ export type HorseState =
   | 'boosted'    // 加速中
   | 'finished';  // ゴール済み
 
+// 馬の調子
+export type HorseCondition = 'excellent' | 'good' | 'normal' | 'poor' | 'terrible';
+
+export interface ConditionConfig {
+  name: string;
+  emoji: string;
+  speedModifier: number;
+  color: string;
+}
+
 // ========================================
 // ギミック関連の型定義
 // ========================================

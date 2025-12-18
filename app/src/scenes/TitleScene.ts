@@ -9,9 +9,19 @@ import {
 export class TitleScene extends Phaser.Scene {
   private _particleEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
   private bgm!: Phaser.Sound.BaseSound;
+  private modalContainer!: Phaser.GameObjects.Container;
+  private modalVisible: boolean = false;
+  private riderInputArea!: HTMLTextAreaElement;
+  private riderPreset: string[] = [];
 
   constructor() {
     super({ key: SCENES.TITLE });
+  }
+
+  init(): void {
+    // モーダル状態をリセット
+    this.modalVisible = false;
+    this.riderPreset = [];
   }
 
   preload(): void {
@@ -54,6 +64,17 @@ export class TitleScene extends Phaser.Scene {
 
     // フッター
     this.createFooter();
+
+    // シーン終了時にHTML要素を削除
+    this.events.on('shutdown', () => {
+      this.cleanupModalElements();
+    });
+  }
+
+  private cleanupModalElements(): void {
+    if (this.riderInputArea) {
+      this.riderInputArea.remove();
+    }
   }
 
   private createBackground(): void {
@@ -496,10 +517,7 @@ export class TitleScene extends Phaser.Scene {
       280,
       70,
       () => {
-        this.cameras.main.fadeOut(400);
-        this.time.delayedCall(400, () => {
-          this.scene.start(SCENES.PADDOCK);
-        });
+        this.showRiderModal();
       }
     );
 
@@ -654,6 +672,150 @@ export class TitleScene extends Phaser.Scene {
       duration: 1500,
       yoyo: true,
       repeat: -1,
+    });
+  }
+
+  private showRiderModal(): void {
+    if (this.modalVisible) return;
+    this.modalVisible = true;
+
+    // モーダルコンテナ
+    this.modalContainer = this.add.container(0, 0).setDepth(1000);
+
+    // 背景オーバーレイ
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.8);
+    overlay.setInteractive();
+    this.modalContainer.add(overlay);
+
+    // モーダルボックス
+    const modalWidth = 700;
+    const modalHeight = 400;
+    const modalBg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, modalWidth, modalHeight, 0x1a1a2e, 0.98);
+    modalBg.setStrokeStyle(4, 0xffd700);
+    this.modalContainer.add(modalBg);
+
+    // タイトル
+    this.modalContainer.add(this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 150, '🏇 乗馬者登録', {
+      fontSize: '36px',
+      color: '#FFD700',
+      fontStyle: 'bold',
+    }).setOrigin(0.5));
+
+    // 説明
+    this.modalContainer.add(this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 100, '参加者名をカンマ区切りで入力してください', {
+      fontSize: '18px',
+      color: '#aaaaaa',
+    }).setOrigin(0.5));
+
+    // HTML テキスト入力エリア
+    const canvas = this.game.canvas;
+    const canvasRect = canvas.getBoundingClientRect();
+    const scaleX = canvasRect.width / GAME_WIDTH;
+    const scaleY = canvasRect.height / GAME_HEIGHT;
+
+    this.riderInputArea = document.createElement('textarea');
+    this.riderInputArea.placeholder = '例: 田中, 山田, 佐藤, 鈴木, 高橋...';
+    this.riderInputArea.style.position = 'absolute';
+    this.riderInputArea.style.left = `${canvasRect.left + (GAME_WIDTH / 2 - 280) * scaleX}px`;
+    this.riderInputArea.style.top = `${canvasRect.top + (GAME_HEIGHT / 2 - 60) * scaleY}px`;
+    this.riderInputArea.style.width = `${560 * scaleX}px`;
+    this.riderInputArea.style.height = `${80 * scaleY}px`;
+    this.riderInputArea.style.fontSize = `${16 * scaleY}px`;
+    this.riderInputArea.style.padding = '12px';
+    this.riderInputArea.style.borderRadius = '8px';
+    this.riderInputArea.style.border = '2px solid #4a4a6a';
+    this.riderInputArea.style.backgroundColor = '#2a2a4a';
+    this.riderInputArea.style.color = '#ffffff';
+    this.riderInputArea.style.resize = 'none';
+    this.riderInputArea.style.zIndex = '1001';
+    document.body.appendChild(this.riderInputArea);
+
+    // ヒント
+    this.modalContainer.add(this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50, '※ 空欄でも開始できます。パドック画面で個別に選択可能です。', {
+      fontSize: '14px',
+      color: '#888888',
+    }).setOrigin(0.5));
+
+    // ボタンエリア
+    const buttonY = GAME_HEIGHT / 2 + 120;
+
+    // キャンセルボタン
+    const cancelBtn = this.add.container(GAME_WIDTH / 2 - 120, buttonY);
+    const cancelBg = this.add.rectangle(0, 0, 180, 55, 0x4a4a4a, 0.9);
+    cancelBg.setStrokeStyle(2, 0x666666);
+    cancelBtn.add(cancelBg);
+    cancelBtn.add(this.add.text(0, 0, '❌ キャンセル', {
+      fontSize: '20px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5));
+    this.modalContainer.add(cancelBtn);
+
+    cancelBg.setInteractive({ useHandCursor: true });
+    cancelBg.on('pointerover', () => cancelBg.setFillStyle(0x5a5a5a));
+    cancelBg.on('pointerout', () => cancelBg.setFillStyle(0x4a4a4a));
+    cancelBg.on('pointerdown', () => {
+      try { this.sound.play('button-click', { volume: 0.7 }); } catch (e) { /* ignore */ }
+      this.closeRiderModal();
+    });
+
+    // 開始ボタン
+    const startBtn = this.add.container(GAME_WIDTH / 2 + 120, buttonY);
+    const startBg = this.add.rectangle(0, 0, 180, 55, 0x27ae60, 0.9);
+    startBg.setStrokeStyle(2, 0x2ecc71);
+    startBtn.add(startBg);
+    startBtn.add(this.add.text(0, 0, '✓ 開始', {
+      fontSize: '20px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5));
+    this.modalContainer.add(startBtn);
+
+    startBg.setInteractive({ useHandCursor: true });
+    startBg.on('pointerover', () => startBg.setFillStyle(0x2ecc71));
+    startBg.on('pointerout', () => startBg.setFillStyle(0x27ae60));
+    startBg.on('pointerdown', () => {
+      try { this.sound.play('button-click', { volume: 0.7 }); } catch (e) { /* ignore */ }
+      this.applyRiderPresetAndStart();
+    });
+
+    // モーダル表示アニメーション
+    this.modalContainer.setAlpha(0);
+    this.tweens.add({
+      targets: this.modalContainer,
+      alpha: 1,
+      duration: 200,
+    });
+  }
+
+  private closeRiderModal(): void {
+    if (!this.modalVisible) return;
+
+    this.cleanupModalElements();
+
+    if (this.modalContainer) {
+      this.modalContainer.destroy();
+    }
+
+    this.modalVisible = false;
+  }
+
+  private applyRiderPresetAndStart(): void {
+    // 入力から乗馬者プリセットを作成
+    const input = this.riderInputArea.value.trim();
+    if (input) {
+      this.riderPreset = input.split(/[,、\n]+/).map(s => s.trim()).filter(s => s.length > 0);
+    } else {
+      this.riderPreset = [];
+    }
+
+    // モーダルを閉じる
+    this.closeRiderModal();
+
+    // パドックシーンへ遷移
+    this.cameras.main.fadeOut(400);
+    this.time.delayedCall(400, () => {
+      this.scene.start(SCENES.PADDOCK, { riderPreset: this.riderPreset });
     });
   }
 }

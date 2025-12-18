@@ -9,6 +9,7 @@ import type { RaceResult } from '../types';
 
 export class ResultScene extends Phaser.Scene {
   private results: RaceResult[] = [];
+  private riders: string[] = [];
   private bgm!: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -26,8 +27,9 @@ export class ResultScene extends Phaser.Scene {
     }
   }
 
-  init(data: { results: RaceResult[] }): void {
+  init(data: { results: RaceResult[]; riders?: string[] }): void {
     this.results = data.results || [];
+    this.riders = data.riders || [];
   }
 
   create(): void {
@@ -209,6 +211,17 @@ export class ResultScene extends Phaser.Scene {
       }).setOrigin(0.5);
       container.add(nameText);
 
+      // 乗馬者表示（設定されている場合）
+      const riderName = this.riders[result.horseId - 1];
+      if (riderName) {
+        const riderText = this.add.text(0, 68 * pos.scale, `👤 ${riderName}`, {
+          fontSize: `${12 * pos.scale}px`,
+          color: '#4ECDC4',
+          fontStyle: 'bold',
+        }).setOrigin(0.5);
+        container.add(riderText);
+      }
+
       // 景品表示
       const prizeBg = this.add.rectangle(0, 85 * pos.scale, 200, 30, 0xffd700, 0.2);
       prizeBg.setStrokeStyle(2, 0xffd700);
@@ -293,6 +306,15 @@ export class ResultScene extends Phaser.Scene {
         color: '#ffffff',
         fontStyle: index < 3 ? 'bold' : 'normal',
       }).setOrigin(0, 0.5);
+
+      // 乗馬者名（設定されている場合）
+      const riderName = this.riders[result.horseId - 1];
+      if (riderName) {
+        this.add.text(x - cellWidth / 2 + 230, y, `👤${riderName}`, {
+          fontSize: '13px',
+          color: '#4ECDC4',
+        }).setOrigin(0, 0.5);
+      }
 
       // 景品表示
       const prizeColor = index < 3 ? '#FFD700' : index < 6 ? '#90EE90' : index < 9 ? '#aaaaaa' : '#FF6B6B';

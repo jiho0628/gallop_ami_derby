@@ -13,11 +13,13 @@ import {
   RACE_MODES,
   RaceMode,
 } from '../config/GameConfig';
-import type { CourseData, RaceResult, PlacedGimmick } from '../types';
+import type { CourseData, RaceResult, PlacedGimmick, HorseCondition } from '../types';
 
 export class RaceScene extends Phaser.Scene {
   private horses: Horse[] = [];
   private courseData!: CourseData;
+  private horseConditions: HorseCondition[] = [];
+  private horseRiders: string[] = [];
   private raceManager!: RaceManager;
   private commentarySystem!: CommentarySystem;
   private laneResults: string[] = [];
@@ -62,9 +64,11 @@ export class RaceScene extends Phaser.Scene {
     }
   }
 
-  init(data: { laneResults: string[]; raceMode?: RaceMode }): void {
+  init(data: { laneResults: string[]; raceMode?: RaceMode; conditions?: HorseCondition[]; riders?: string[] }): void {
     this.laneResults = data.laneResults || [];
     this.raceMode = data.raceMode || 'LONG';
+    this.horseConditions = data.conditions || [];
+    this.horseRiders = data.riders || [];
     this.horses = [];
     this.raceStarted = false;
     this.raceFinished = false;
@@ -149,7 +153,7 @@ export class RaceScene extends Phaser.Scene {
       this.time.delayedCall(2500, () => {
         this.cameras.main.fadeOut(500);
         this.time.delayedCall(500, () => {
-          this.scene.start(SCENES.RESULT, { results });
+          this.scene.start(SCENES.RESULT, { results, riders: this.horseRiders });
         });
       });
     });
@@ -473,7 +477,8 @@ export class RaceScene extends Phaser.Scene {
 
   private createHorses(): void {
     HORSES.forEach((horseData, index) => {
-      const horse = new Horse(this, horseData, index);
+      const condition = this.horseConditions[index] || 'normal';
+      const horse = new Horse(this, horseData, index, condition);
       this.horses.push(horse);
       this.courseContainer.add(horse);
     });
@@ -541,7 +546,7 @@ export class RaceScene extends Phaser.Scene {
   private startRace(): void {
     this.raceStarted = true;
     this.horses.forEach(horse => horse.startRace());
-    this.commentarySystem.addMessage('レーススタート！15頭が一斉にゲートを飛び出した！');
+    this.commentarySystem.addMessage('レーススタート！15とうが一斉にゲートを飛び出した！');
 
     // 2つの音を交互に再生
     this.playAlternatingAudio();

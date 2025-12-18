@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import type { HorseData, HorseState, GimmickType } from '../types';
-import { HORSE_CONFIG, COURSE_CONFIG } from '../config/GameConfig';
+import type { HorseData, HorseState, GimmickType, HorseCondition } from '../types';
+import { HORSE_CONFIG, COURSE_CONFIG, CONDITION_CONFIG } from '../config/GameConfig';
 import { GIMMICKS } from '../data/horses';
 
 export class Horse extends Phaser.GameObjects.Container {
@@ -10,6 +10,8 @@ export class Horse extends Phaser.GameObjects.Container {
   public currentSpeed: number;
   public positionX: number = 0;
   public finishTime: number = 0;
+  public condition: HorseCondition = 'normal';
+  private conditionModifier: number = 1;
 
   // 状態管理
   private stunTimer: number = 0;
@@ -31,13 +33,15 @@ export class Horse extends Phaser.GameObjects.Container {
   private label: Phaser.GameObjects.Text;
   private stateIndicator: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene, horseData: HorseData, lane: number) {
+  constructor(scene: Phaser.Scene, horseData: HorseData, lane: number, condition: HorseCondition = 'normal') {
     super(scene, HORSE_CONFIG.startX, 0);
 
     this.horseData = horseData;
     this.currentLane = lane;
     this.targetLane = lane;
-    this.currentSpeed = HORSE_CONFIG.baseSpeed * horseData.stats.speed;
+    this.condition = condition;
+    this.conditionModifier = CONDITION_CONFIG[condition].speedModifier;
+    this.currentSpeed = HORSE_CONFIG.baseSpeed * horseData.stats.speed * this.conditionModifier;
     this.positionX = HORSE_CONFIG.startX;
 
     // Y座標を計算
@@ -256,6 +260,11 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleConstruction(): { blocked: boolean; message?: string } {
+    // プロフェッサーP: 悪いギミックを事前回避
+    if (this.horseData.id === 3) {
+      return { blocked: true, message: `${this.horseData.name}が工事中を華麗に回避！` };
+    }
+
     // ゴースト・ライダー: 工事中をすり抜け
     if (this.horseData.id === 9) {
       return { blocked: true, message: `${this.horseData.name}が工事中をすり抜けた！` };
@@ -264,6 +273,14 @@ export class Horse extends Phaser.GameObjects.Container {
     // アイアンタフネス & ヘヴィ・メタル・ベア: 破壊
     if (this.horseData.id === 2 || this.horseData.id === 12) {
       return { blocked: false, message: `${this.horseData.name}が工事中を破壊！` };
+    }
+
+    // カオス・ジョーカー: 50%で効果反転（工事中を加速に）
+    if (this.horseData.id === 5 && Math.random() < 0.5) {
+      this.boostTimer = 2000;
+      this.boostMultiplier = 1.5;
+      this.state = 'boosted';
+      return { blocked: false, message: `${this.horseData.name}の効果反転！🚧で加速！` };
     }
 
     // 通常処理: 1秒停止後、隣のレーンへ
@@ -289,6 +306,16 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handlePoop(): { blocked: boolean; message?: string } {
+    // プロフェッサーP: 悪いギミックを事前回避
+    if (this.horseData.id === 3) {
+      return { blocked: true, message: `${this.horseData.name}が💩を華麗に回避！` };
+    }
+
+    // ミスター・セーフティ: 💩を完全無効化
+    if (this.horseData.id === 8) {
+      return { blocked: true, message: `${this.horseData.name}が安全圏で💩を無効化！` };
+    }
+
     // ミスター・セーフティの近くにいる馬は無効
     // (RaceManagerで処理)
 
@@ -298,6 +325,11 @@ export class Horse extends Phaser.GameObjects.Container {
       this.boostMultiplier = 1.8;
       this.state = 'boosted';
       return { blocked: false, message: `${this.horseData.name}が💩を食べて加速！` };
+    }
+
+    // アイアンタフネス: 💩を破壊して無効化
+    if (this.horseData.id === 2) {
+      return { blocked: false, message: `${this.horseData.name}が💩を粉砕！` };
     }
 
     // カオス・ジョーカー: 50%で効果反転
@@ -314,10 +346,6 @@ export class Horse extends Phaser.GameObjects.Container {
     // ゴールデンバレット: 2倍
     if (this.horseData.id === 1) {
       stunDuration *= 2;
-    }
-    // アイアンタフネス: 70%カット
-    if (this.horseData.id === 2) {
-      stunDuration *= 0.3;
     }
 
     this.stunTimer = stunDuration;
@@ -338,9 +366,24 @@ export class Horse extends Phaser.GameObjects.Container {
   }
 
   private handleMud(): { blocked: boolean; message?: string } {
+    // プロフェッサーP: 悪いギミックを事前回避
+    if (this.horseData.id === 3) {
+      return { blocked: true, message: `${this.horseData.name}がぬかるみを華麗に回避！` };
+    }
+
+    // ミスター・セーフティ: 💧を完全無効化
+    if (this.horseData.id === 8) {
+      return { blocked: true, message: `${this.horseData.name}が安全圏で💧を無効化！` };
+    }
+
     // ヘヴィ・メタル・ベア: 粉砕
     if (this.horseData.id === 12) {
       return { blocked: false, message: `${this.horseData.name}がぬかるみを粉砕！` };
+    }
+
+    // アイアンタフネス: 💧を破壊して無効化
+    if (this.horseData.id === 2) {
+      return { blocked: false, message: `${this.horseData.name}が💧を粉砕！` };
     }
 
     // マッドスライマー: 逆に加速
