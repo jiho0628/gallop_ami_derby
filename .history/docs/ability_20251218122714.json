@@ -1,0 +1,234 @@
+{
+    "gameTitle": "Gallop Amida Derby",
+    "version": "1.0.0",
+    "horses": [
+        {
+            "id": 1,
+            "name": "ゴールデンバレット",
+            "catchphrase": "最速の貴公子",
+            "stats": {
+                "spd": 1.5,
+                "int": 0.8,
+                "pow": 0.5
+            },
+            "abilities": {
+                "description": "芝生で爆速、汚れに極端に弱い",
+                "grassBoostMultiplier": 2.0,
+                "mudPenaltyMultiplier": 2.0,
+                "poopStunMultiplier": 2.0
+            }
+        },
+        {
+            "id": 2,
+            "name": "アイアンタフネス",
+            "catchphrase": "走る重戦車",
+            "stats": {
+                "spd": 0.8,
+                "int": 0.6,
+                "pow": 1.8
+            },
+            "abilities": {
+                "description": "工事中を破壊、うんこに強い",
+                "canBreakConstruction": true,
+                "poopStunMultiplier": 0.3
+            }
+        },
+        {
+            "id": 3,
+            "name": "プロフェッサーP",
+            "catchphrase": "盤上の策士",
+            "stats": {
+                "spd": 1.0,
+                "int": 2.0,
+                "pow": 0.8
+            },
+            "abilities": {
+                "description": "分岐を100%曲がる、罠を予測回避",
+                "turnSuccessRate": 1.0,
+                "avoidGimmickRange": 150
+            }
+        },
+        {
+            "id": 4,
+            "name": "スプリングホッパー",
+            "catchphrase": "縦横無尽のバネ男",
+            "stats": {
+                "spd": 1.1,
+                "int": 1.0,
+                "pow": 1.0
+            },
+            "abilities": {
+                "description": "バネで2レーン移動、着地後加速",
+                "springJumpDistance": 2,
+                "postSpringBoostTime": 2000
+            }
+        },
+        {
+            "id": 5,
+            "name": "カオス・ジョーカー",
+            "catchphrase": "予測不能の道化師",
+            "stats": {
+                "spd": 1.0,
+                "int": 1.0,
+                "pow": 1.0
+            },
+            "abilities": {
+                "description": "確率でギミック効果が反転",
+                "reverseEffectChance": 0.3
+            }
+        },
+        {
+            "id": 6,
+            "name": "マッドスライマー",
+            "catchphrase": "泥に咲く蓮",
+            "stats": {
+                "spd": 0.9,
+                "int": 0.8,
+                "pow": 1.5
+            },
+            "abilities": {
+                "description": "ぬかるみで速度1.5倍",
+                "mudSpeedMultiplier": 1.5
+            }
+        },
+        {
+            "id": 7,
+            "name": "グラス・イーター",
+            "catchphrase": "芝の掃除屋",
+            "stats": {
+                "spd": 1.0,
+                "int": 0.7,
+                "pow": 1.2
+            },
+            "abilities": {
+                "description": "芝生ブースト持続時間が3倍",
+                "grassBoostDurationMultiplier": 3.0
+            }
+        },
+        {
+            "id": 8,
+            "name": "ミスター・セーフティ",
+            "catchphrase": "交通安全の守護神",
+            "stats": {
+                "spd": 0.9,
+                "int": 1.2,
+                "pow": 1.3
+            },
+            "abilities": {
+                "description": "周囲の馬の妨害を無効化",
+                "auraRange": 100,
+                "auraType": "anti_trap"
+            }
+        },
+        {
+            "id": 9,
+            "name": "ゴースト・ライダー",
+            "catchphrase": "存在感ゼロの幻影",
+            "stats": {
+                "spd": 1.1,
+                "int": 0.5,
+                "pow": 1.0
+            },
+            "abilities": {
+                "description": "工事中と他馬をすり抜ける",
+                "passthroughConstruction": true,
+                "passthroughHorses": true,
+                "ignoreGrass": true
+            }
+        },
+        {
+            "id": 10,
+            "name": "ナイトメア・ハザード",
+            "catchphrase": "あみだの疫病神",
+            "stats": {
+                "spd": 1.2,
+                "int": 1.1,
+                "pow": 0.9
+            },
+            "abilities": {
+                "description": "ギミック接触時に後方へ💩設置",
+                "dropTrapType": "poop",
+                "immuneToSelfPoop": true
+            }
+        },
+        {
+            "id": 11,
+            "name": "ミラクル・ダイス",
+            "catchphrase": "ギャンブルの化身",
+            "stats": {
+                "spd": 1.0,
+                "int": 1.0,
+                "pow": 1.0
+            },
+            "abilities": {
+                "description": "5秒ごとに全能力がランダム変動",
+                "shuffleInterval": 5000,
+                "shuffleRange": [
+                    0.5,
+                    2.5
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "name": "ヘヴィ・メタル・ベア",
+            "catchphrase": "不動の重量級",
+            "stats": {
+                "spd": 0.7,
+                "int": 0.5,
+                "pow": 2.5
+            },
+            "abilities": {
+                "description": "工事中を粉砕、バネが反応しない",
+                "canBreakConstruction": true,
+                "immuneToSpring": true,
+                "mudSpeedMultiplier": 1.0
+            }
+        },
+        {
+            "id": 13,
+            "name": "ドリーム・クリーナー",
+            "catchphrase": "掃除の達人",
+            "stats": {
+                "spd": 1.1,
+                "int": 1.2,
+                "pow": 0.8
+            },
+            "abilities": {
+                "description": "💩を食べて加速",
+                "eatPoop": true,
+                "eatPoopBoost": 1.8
+            }
+        },
+        {
+            "id": 14,
+            "name": "サイド・スライダー",
+            "catchphrase": "斜め上の刺客",
+            "stats": {
+                "spd": 1.0,
+                "int": 1.5,
+                "pow": 1.0
+            },
+            "abilities": {
+                "description": "レーン移動速度が3倍",
+                "laneChangeSpeedMultiplier": 3.0,
+                "invincibleDuringLaneChange": true
+            }
+        },
+        {
+            "id": 15,
+            "name": "アンラッキー・バニー",
+            "catchphrase": "不幸中の幸い",
+            "stats": {
+                "spd": 1.2,
+                "int": 0.5,
+                "pow": 0.5
+            },
+            "abilities": {
+                "description": "ダメージを受けるほど速度蓄積",
+                "accumulateDamageToSpeed": true,
+                "boostTimePerDamage": 3000
+            }
+        }
+    ]
+}

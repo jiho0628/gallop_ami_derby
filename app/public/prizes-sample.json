@@ -1,0 +1,64 @@
+{
+  "prizes": [
+    {
+      "rank": 1,
+      "prize": "きむしゅん"
+    },
+    {
+      "rank": 2,
+      "prize": "門倉くん"
+    },
+    {
+      "rank": 3,
+      "prize": "なみき"
+    },
+    {
+      "rank": 4,
+      "prize": "田中"
+    },
+    {
+      "rank": 5,
+      "prize": "じほ"
+    },
+    {
+      "rank": 6,
+      "prize": "つぼた"
+    },
+    {
+      "rank": 7,
+      "prize": "かいせい"
+    },
+    {
+      "rank": 8,
+      "prize": "星田"
+    },
+    {
+      "rank": 9,
+      "prize": "山下"
+    },
+    {
+      "rank": 10,
+      "prize": "こうの"
+    },
+    {
+      "rank": 11,
+      "prize": "辻"
+    },
+    {
+      "rank": 12,
+      "prize": "その他"
+    },
+    {
+      "rank": 13,
+      "prize": "その他"
+    },
+    {
+      "rank": 14,
+      "prize": "その他"
+    },
+    {
+      "rank": 15,
+      "prize": "その他"
+    }
+  ]
+}

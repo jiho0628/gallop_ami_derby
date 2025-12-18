@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source code for hot reload
+      - ./app:/app
+      # Preserve node_modules inside container
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Enable polling for file watching in Docker
+    command: npm run dev -- --host 0.0.0.0
